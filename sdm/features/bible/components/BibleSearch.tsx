@@ -23,10 +23,7 @@ function buildHighlightPattern(keyword: string) {
   const trimmedKeyword = keyword.trim();
   if (!trimmedKeyword) return null;
 
-  return {
-    pattern: new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi"),
-    normalizedKeyword: trimmedKeyword.toLocaleLowerCase(),
-  };
+  return new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi");
 }
 
 function renderHighlightedText(
@@ -35,11 +32,10 @@ function renderHighlightedText(
 ) {
   if (!highlightPattern) return text;
 
-  const { pattern, normalizedKeyword } = highlightPattern;
-  const parts = text.split(pattern);
+  const parts = text.split(highlightPattern);
 
   return parts.map((part, index) =>
-    part.toLocaleLowerCase() === normalizedKeyword ? (
+    index % 2 === 1 ? (
       <mark key={index}>{part}</mark>
     ) : (
       <Fragment key={index}>{part}</Fragment>
