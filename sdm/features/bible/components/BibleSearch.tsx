@@ -19,12 +19,24 @@ function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-function renderHighlightedText(text: string, keyword: string) {
+function buildHighlightPattern(keyword: string) {
   const trimmedKeyword = keyword.trim();
-  if (!trimmedKeyword) return text;
+  if (!trimmedKeyword) return null;
 
-  const parts = text.split(new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi"));
-  const normalizedKeyword = trimmedKeyword.toLocaleLowerCase();
+  return {
+    pattern: new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi"),
+    normalizedKeyword: trimmedKeyword.toLocaleLowerCase(),
+  };
+}
+
+function renderHighlightedText(
+  text: string,
+  highlightPattern: ReturnType<typeof buildHighlightPattern>
+) {
+  if (!highlightPattern) return text;
+
+  const { pattern, normalizedKeyword } = highlightPattern;
+  const parts = text.split(pattern);
 
   return parts.map((part, index) =>
     part.toLocaleLowerCase() === normalizedKeyword ? (
@@ -47,6 +59,7 @@ export function BibleSearch({
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightPattern = buildHighlightPattern(query);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -127,7 +140,7 @@ export function BibleSearch({
                       </span>
                     </div>
                     <p className="text-sm leading-relaxed text-[#171717] dark:text-[#f5f5f5]">
-                      {renderHighlightedText(result.highlightedText, query)}
+                      {renderHighlightedText(result.displayText, highlightPattern)}
                     </p>
                   </button>
                 ))}

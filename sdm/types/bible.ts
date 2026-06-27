@@ -40,7 +40,7 @@ export interface BibleReference {
 
 export interface BibleSearchResult {
   verse: BibleVerse;
-  highlightedText: string;
+  displayText: string;
   matchScore: number;
 }
 

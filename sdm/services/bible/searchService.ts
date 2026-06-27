@@ -58,7 +58,7 @@ export async function searchBibleByKeyword(
     const verse = doc.data() as BibleVerse;
     results.push({
       verse,
-      highlightedText: verse.text,
+      displayText: verse.text,
       matchScore: calculateMatchScore(verse.text, keyword),
     });
   });

@@ -135,7 +135,7 @@ export async function searchBible(query: string, limit = 50): Promise<BibleSearc
   if (reference) {
     return (await getVersesByReference(reference)).map((verse) => ({
       verse,
-      highlightedText: verse.text,
+      displayText: verse.text,
       matchScore: 100,
     }));
   }
@@ -153,7 +153,7 @@ export async function searchBible(query: string, limit = 50): Promise<BibleSearc
     .filter((verse) => normalize(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`).includes(normalize(keyword)))
     .map((verse) => ({
       verse,
-      highlightedText: verse.text,
+      displayText: verse.text,
       matchScore: scoreVerse(verse, keyword),
     }));
 
@@ -163,7 +163,7 @@ export async function searchBible(query: string, limit = 50): Promise<BibleSearc
       return firstVerse
         ? {
             verse: firstVerse,
-            highlightedText: `${book.name} 1장으로 이동`,
+            displayText: `${book.name} 1장으로 이동`,
             matchScore: 80,
           }
         : null;
