@@ -1,0 +1,127 @@
+You are the lead frontend engineer for SDM.
+
+Implement Sprint 3: Home Dashboard (User Facing App).
+
+This is the main screen users see after login.
+
+========================
+HOME SCREEN
+========================
+
+Create a production-ready home dashboard.
+
+The home screen must be mobile-first and fast.
+
+It should aggregate all important church information.
+
+========================
+SECTIONS
+========================
+
+1. Today’s Verse
+
+- Show one verse of the day
+- Same for all users on same date
+
+2. Today’s QT
+
+- Show today's designated QT passage
+- Click to open Bible module
+
+3. Announcements Preview
+
+- Show latest 3~5 announcements
+- Click to open full list
+
+4. Weekly Schedule
+
+- Display current week events
+- Worship, meetings, events
+
+5. Bulletin Preview
+
+- Show latest bulletin image
+- Click to open full view
+
+6. Worship Playlist
+
+- Show YouTube playlist links
+- Click opens external player
+
+7. My Church Info
+
+- Name
+- Generation (XX또래)
+- Team
+- Cell
+- Role
+
+8. Activity Summary
+
+- QT count
+- Attendance rate
+- Prayer count
+- Streak (consecutive days)
+
+9. Quick Actions
+
+- Bible
+- QT writing
+- Prayer request
+- Schedule
+
+========================
+DATA INTEGRATION
+========================
+
+Connect to Firestore:
+
+- announcements
+- events
+- bulletins
+- users
+- qt
+- bible
+
+Use real-time or cached data where possible.
+
+========================
+UI / UX
+========================
+
+- Apple / Toss style UI
+- Card-based layout
+- Responsive mobile-first design
+- Dark mode support
+- Loading skeletons
+- Empty states
+
+========================
+PERFORMANCE
+========================
+
+- Lazy load sections
+- Avoid unnecessary re-renders
+- Optimize Firestore reads
+- Cache frequently used data
+
+========================
+RULES
+========================
+
+- No mock data in production logic
+- No duplicated components
+- Use TypeScript strict mode
+- Feature-based structure
+- Clean architecture
+- Reusable UI components only
+
+========================
+AFTER COMPLETION
+========================
+
+- Run type check
+- Fix all errors
+- Output file structure
+- List created components
+- List Firestore queries used
