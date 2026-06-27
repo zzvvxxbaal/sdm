@@ -15,8 +15,9 @@ import {
   query,
   where,
   orderBy,
-  Timestamp,
+  limit,
   serverTimestamp,
+  type QueryConstraint,
 } from "firebase/firestore";
 import type { QTEntry, QTEntryInput } from "@/types/qt";
 
@@ -100,19 +101,16 @@ export async function getQTEntriesByDateRange(
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as QTEntry);
 }
 
-// Import limit from firestore
-import { limit as firestoreLimit } from "firebase/firestore";
-
 export async function getUserQTEntriesWithLimit(
   userId: string,
   options?: { limit?: number; order?: "asc" | "desc" }
 ): Promise<QTEntry[]> {
-  const constraints: any[] = [
+  const constraints: QueryConstraint[] = [
     where("userId", "==", userId),
     orderBy("date", options?.order || "desc"),
   ];
   if (options?.limit) {
-    constraints.push(firestoreLimit(options.limit));
+    constraints.push(limit(options.limit));
   }
   const q = query(collection(db, QT_COLLECTION), ...constraints);
   const snap = await getDocs(q);

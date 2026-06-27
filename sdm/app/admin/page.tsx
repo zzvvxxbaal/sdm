@@ -1,127 +1,67 @@
 "use client";
 
-import { useState } from "react";
-import { Inbox, Users2, UserX } from "lucide-react";
-
-import { withRole } from "@/features/auth";
-import { UserRole } from "@/types/role";
-import { ApprovalStatus } from "@/types/member";
-import { useMemberAdmin } from "@/features/admin/hooks/useMemberAdmin";
 import {
-  MemberRow,
-  RejectModal,
-  AssignModal,
-} from "@/features/admin/components";
-import {
-  PageHeader,
-  FullScreenSpinner,
-  EmptyState,
-  Badge,
-} from "@/components/ui";
-import { cn } from "@/lib/utils";
-import type { UserProfile } from "@/types/user";
+  Users2,
+  Network,
+  Megaphone,
+  BookOpen,
+  Settings,
+  ClipboardList,
+  Boxes,
+} from "lucide-react";
 
-const TABS = [
-  { key: ApprovalStatus.PENDING, label: "승인 대기", icon: Inbox },
-  { key: ApprovalStatus.APPROVED, label: "승인 완료", icon: Users2 },
-  { key: ApprovalStatus.REJECTED, label: "거절", icon: UserX },
-] as const;
+import { useAdminStats } from "@/features/admin/hooks/useAdminStats";
+import { AdminNavCard } from "@/features/admin/components";
+import { PageHeader, StatItem } from "@/components/ui";
 
-function AdminPage() {
-  const {
-    byStatus,
-    teams,
-    cells,
-    isLoading,
-    error,
-    approve,
-    reject,
-    assign,
-    setActive,
-  } = useMemberAdmin();
-
-  const [tab, setTab] = useState<ApprovalStatus>(ApprovalStatus.PENDING);
-  const [rejectTarget, setRejectTarget] = useState<UserProfile | null>(null);
-  const [assignTarget, setAssignTarget] = useState<UserProfile | null>(null);
-
-  const list = byStatus[tab];
+export default function AdminDashboardPage() {
+  const { stats, isLoading } = useAdminStats();
+  const fmt = (value: number | undefined) => (isLoading ? "—" : value ?? 0);
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
-      <PageHeader
-        title="회원 관리"
-        description="가입 승인과 팀·셀·직분·권한을 관리합니다"
-      />
+      <PageHeader title="관리자" description="서대문교회 청년부 운영 관리" />
 
-      <div className="mb-5 flex gap-1 rounded-xl bg-[#f5f5f5] p-1 dark:bg-[#262626]">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            onClick={() => setTab(key)}
-            className={cn(
-              "flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all",
-              tab === key
-                ? "bg-white text-[#171717] shadow-sm dark:bg-[#1c1c1e] dark:text-[#f5f5f5]"
-                : "text-[#737373] hover:text-[#171717] dark:hover:text-[#f5f5f5]"
-            )}
-          >
-            <Icon className="h-3.5 w-3.5" />
-            {label}
-            <Badge>{byStatus[key].length}</Badge>
-          </button>
-        ))}
+      <div className="mb-6 grid grid-cols-2 gap-3">
+        <StatItem icon={Users2} label="전체 회원" value={fmt(stats?.totalMembers)} suffix="명" />
+        <StatItem icon={ClipboardList} label="승인 대기" value={fmt(stats?.pendingApprovals)} suffix="명" />
+        <StatItem icon={Network} label="팀" value={fmt(stats?.totalTeams)} suffix="개" />
+        <StatItem icon={Boxes} label="소그룹" value={fmt(stats?.totalCells)} suffix="개" />
       </div>
 
-      {isLoading ? (
-        <FullScreenSpinner />
-      ) : error ? (
-        <EmptyState icon={UserX} title="불러오기 실패" description={error} />
-      ) : list.length === 0 ? (
-        <EmptyState
-          icon={Inbox}
-          title="회원이 없습니다"
-          description="해당 상태의 회원이 아직 없어요."
+      <div className="space-y-2.5">
+        <AdminNavCard
+          href="/admin/members"
+          icon={Users2}
+          title="회원 관리"
+          description="가입 승인 · 팀/순 · 권한"
+          badge={stats?.pendingApprovals}
         />
-      ) : (
-        <div className="space-y-3">
-          {list.map((member) => (
-            <MemberRow
-              key={member.uid}
-              member={member}
-              onApprove={() => approve(member.uid)}
-              onReject={() => setRejectTarget(member)}
-              onAssign={() => setAssignTarget(member)}
-              onToggleActive={() => setActive(member.uid, !member.isActive)}
-            />
-          ))}
-        </div>
-      )}
-
-      {rejectTarget && (
-        <RejectModal
-          isOpen={!!rejectTarget}
-          memberName={rejectTarget.displayName ?? "회원"}
-          onClose={() => setRejectTarget(null)}
-          onConfirm={(reason) => reject(rejectTarget.uid, reason)}
+        <AdminNavCard
+          href="/admin/organization"
+          icon={Network}
+          title="조직 관리"
+          description="팀과 소그룹 편성, 리더 지정"
         />
-      )}
-
-      {assignTarget && (
-        <AssignModal
-          isOpen={!!assignTarget}
-          member={assignTarget}
-          teams={teams}
-          cells={cells}
-          onClose={() => setAssignTarget(null)}
-          onConfirm={(input) => assign(assignTarget.uid, input)}
+        <AdminNavCard
+          href="/admin/content"
+          icon={Megaphone}
+          title="콘텐츠 관리"
+          description="공지 · 일정 · 주보 · 찬양"
         />
-      )}
+        <AdminNavCard
+          href="/admin/daily"
+          icon={BookOpen}
+          title="오늘의 말씀/QT"
+          description="홈 화면 말씀과 묵상 설정"
+        />
+        <AdminNavCard
+          href="/admin/settings"
+          icon={Settings}
+          title="설정"
+          description="소그룹 명칭 등 기본 설정"
+        />
+      </div>
     </div>
   );
 }
-
-export default withRole(AdminPage, [
-  UserRole.LEADER,
-  UserRole.ADMIN,
-  UserRole.SUPER_ADMIN,
-]);

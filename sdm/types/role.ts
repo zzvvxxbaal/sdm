@@ -39,6 +39,15 @@ export const ASSIGNABLE_ROLES: UserRole[] = [
   UserRole.ADMIN,
 ];
 
+/**
+ * Roles permitted to access the admin core system. "Pastor" maps to SUPER_ADMIN
+ * since the platform models seniority through roles, not a separate pastor flag.
+ */
+export const ADMIN_ACCESS_ROLES: UserRole[] = [
+  UserRole.ADMIN,
+  UserRole.SUPER_ADMIN,
+];
+
 export function hasRole(role: UserRole, required: UserRole): boolean {
   return ROLE_HIERARCHY[role] >= ROLE_HIERARCHY[required];
 }

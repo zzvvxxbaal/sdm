@@ -14,6 +14,7 @@ export const COLLECTIONS = {
   TEAMS: "teams",
   CELLS: "cells",
   ORGANIZATION_SETTINGS: "organization_settings",
+  DAILY_CONTENT: "daily_content",
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
@@ -34,4 +35,5 @@ export const COLLECTION_LABELS: Record<CollectionName, string> = {
   [COLLECTIONS.TEAMS]: "팀",
   [COLLECTIONS.CELLS]: "순",
   [COLLECTIONS.ORGANIZATION_SETTINGS]: "조직 설정",
+  [COLLECTIONS.DAILY_CONTENT]: "오늘의 콘텐츠",
 };

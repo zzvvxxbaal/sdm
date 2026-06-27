@@ -24,6 +24,20 @@ export interface QTEntry {
   updatedAt: string;
 }
 
+export interface QTEntryInput {
+  userName: string;
+  bibleReference: QTEntry["bibleReference"];
+  title: string;
+  meditation: string;
+  prayer: string;
+  application: string;
+  tags: string[];
+  emotion: string | null;
+  visibility: QTVisibility;
+  isFavorite: boolean;
+  isArchived: boolean;
+}
+
 export interface QTTemplate {
   id: string;
   name: string;

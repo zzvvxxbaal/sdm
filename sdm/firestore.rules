@@ -44,6 +44,17 @@ service cloud.firestore {
       return isApprovedActive() && myRole() == 'super_admin';
     }
 
+    // Collections that have their own explicit match block below. The generic
+    // catch-all opts out of these so its permissive leader-write default can
+    // never widen (union) the stricter, authoritative per-collection rules.
+    function hasExplicitRules(name) {
+      return name in [
+        'users', 'teams', 'cells', 'organization_settings',
+        'announcements', 'events', 'bulletins', 'playlists',
+        'daily_content', 'audit_logs'
+      ];
+    }
+
     // Fields a member may NEVER change on their own document.
     function privilegedUnchanged() {
       let before = resource.data;
@@ -102,17 +113,46 @@ service cloud.firestore {
     }
 
     // ---------- Organization structure (teams / cells) ----------
+    // Admin core: only admins/super_admins may edit the org structure.
     match /teams/{teamId} {
       allow read: if isApprovedActive();
-      allow write: if isLeaderPlus();
+      allow write: if isAdminPlus();
     }
 
     match /cells/{cellId} {
       allow read: if isApprovedActive();
-      allow write: if isLeaderPlus();
+      allow write: if isAdminPlus();
     }
 
     match /organization_settings/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    // ---------- Content (announcements / events / bulletins / playlists) ----------
+    // Approved members read; only admins author and manage content.
+    match /announcements/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    match /events/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    match /bulletins/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    match /playlists/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    // ---------- Daily content (today's verse / QT) ----------
+    match /daily_content/{docId} {
       allow read: if isApprovedActive();
       allow write: if isAdminPlus();
     }
@@ -125,9 +165,11 @@ service cloud.firestore {
     }
 
     // ---------- Default: approved members read; leaders write ----------
+    // Excludes collections with explicit rules above so it cannot grant
+    // leader-level writes to admin-only (or owner-guarded) collections.
     match /{collection}/{docId} {
       allow read: if isApprovedActive();
-      allow write: if isLeaderPlus();
+      allow write: if isLeaderPlus() && !hasExplicitRules(collection);
     }
   }
 }

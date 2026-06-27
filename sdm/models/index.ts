@@ -13,3 +13,4 @@ export { sermonSchema, sermonConverter, type Sermon, type SermonModel } from "./
 export { teamSchema, teamConverter, type Team, type TeamModel } from "./team";
 export { cellSchema, cellConverter, type Cell, type CellModel } from "./cell";
 export { organizationSettingsSchema, organizationSettingsConverter, type OrganizationSettings, type OrganizationSettingsModel } from "./organization_settings";
+export { dailyContentSchema, dailyContentConverter, type DailyContent, type DailyContentModel, type TodaysVerse, type TodaysQtPassage } from "./daily_content";
