@@ -1,0 +1,406 @@
+You are the lead software architect and senior full-stack engineer for the SDM project.
+
+Project Name:
+SDM
+
+Subtitle:
+서대문교회 청년부
+
+Mission:
+Build a production-ready church youth platform with enterprise-level architecture, security, scalability, and maintainability.
+
+======================================================
+BIBLE DATA
+======================================================
+
+A Bible text file is attached.
+
+Use ONLY the attached Bible file as the source.
+
+Analyze the file structure.
+
+Do NOT modify the original file.
+
+Build a parser that converts the Bible into optimized searchable indexed data.
+
+The parser must support future Bible file updates.
+
+Prepare import scripts if necessary.
+
+======================================================
+BIBLE FEATURES
+======================================================
+
+Create a complete Bible module.
+
+Support:
+
+• Old Testament
+• New Testament
+• Book selector
+• Chapter selector
+• Verse selector
+• Previous / Next chapter
+• Swipe navigation (mobile)
+
+======================================================
+
+SEARCH
+
+Support:
+
+• Book search
+• Chapter search
+• Verse search
+• Reference search
+
+Examples:
+
+창 1:1
+요 3:16
+롬 8:28
+
+Keyword search
+
+Examples:
+
+사랑
+믿음
+은혜
+십자가
+
+Highlight matching words.
+
+Instant search.
+
+======================================================
+
+BOOKMARKS
+
+Users can
+
+• Save verses
+• Remove bookmarks
+• Create bookmark folders
+• Add notes to bookmarks
+
+======================================================
+
+READING HISTORY
+
+Automatically save
+
+• Recently viewed books
+• Recently viewed chapters
+• Recently viewed verses
+• Search history
+
+======================================================
+
+TODAY'S VERSE
+
+Generate one verse every day.
+
+All users should receive the same verse each day.
+
+Display on the Home screen.
+
+======================================================
+
+VERSE SHARING
+
+Support
+
+• Copy
+• Share text
+• Future Kakao Share integration
+
+======================================================
+
+READING SETTINGS
+
+Support
+
+• Font size
+• Line spacing
+• Dark mode
+• Light mode
+• Reading themes
+
+======================================================
+
+READING PLAN
+
+Prepare architecture for
+
+• 30-day reading
+• 90-day reading
+• One-year reading
+• Custom plans
+
+Track reading progress.
+
+Reading streak.
+
+Completion statistics.
+
+======================================================
+QT (Quiet Time)
+======================================================
+
+Each user has a personal QT journal.
+
+QT includes
+
+• Bible Reference
+• Title
+• Meditation
+• Prayer
+• Application
+• Tags
+• Emotion
+• Photos (future support)
+• Attachments (future support)
+
+Visibility
+
+• Private
+• Cell only
+• Team only
+• Entire Church
+• Leaders only
+• Admin only
+
+Users can
+
+Create
+
+Edit
+
+Delete
+
+Archive
+
+Favorite
+
+Search
+
+Filter
+
+Sort
+
+======================================================
+
+QT CALENDAR
+
+Monthly calendar.
+
+Show completed QT days.
+
+Reading streak.
+
+Statistics.
+
+Weekly summary.
+
+Monthly summary.
+
+======================================================
+
+TODAY'S QT
+
+Administrators or pastors can designate:
+
+Today's passage
+
+Weekly passage
+
+Monthly reading
+
+All members can open the passage directly and write QT.
+
+======================================================
+
+SERMON INTEGRATION
+
+Sermons can include Bible references.
+
+Example
+
+Romans 8:28-39
+
+Clicking the reference opens the Bible directly.
+
+======================================================
+
+BULLETIN INTEGRATION
+
+Church bulletins can contain Bible references.
+
+Automatically recognize references.
+
+Open the Bible with one click.
+
+======================================================
+
+PRAYER REQUEST INTEGRATION
+
+When writing prayer requests,
+
+users can attach Bible references.
+
+Clicking the reference opens the Bible.
+
+======================================================
+
+EVENT INTEGRATION
+
+Church events can include Bible references.
+
+======================================================
+HOME SCREEN
+======================================================
+
+Home should include
+
+Today's Verse
+
+Today's QT
+
+Reading Progress
+
+Current Reading Plan
+
+Continue Reading
+
+Recent Bible History
+
+Recommended Passage
+
+======================================================
+ADMIN FEATURES
+======================================================
+
+Administrators can
+
+Recommend today's verse
+
+Recommend today's QT
+
+Create reading plans
+
+Edit reading plans
+
+Create church-wide reading campaigns
+
+Manage recommended passages
+
+Manage Bible resources
+
+======================================================
+PASTOR FEATURES
+======================================================
+
+Pastors can
+
+Recommend passages
+
+Recommend QT
+
+Link sermons
+
+Link weekly Bible study
+
+======================================================
+PERFORMANCE
+======================================================
+
+Use indexed searching.
+
+No linear full-text scan.
+
+Lazy loading.
+
+Cache frequently used chapters.
+
+Fast mobile performance.
+
+======================================================
+FOLDER STRUCTURE
+======================================================
+
+features/bible
+
+features/qt
+
+components/bible
+
+components/qt
+
+services/bible
+
+hooks
+
+parser
+
+lib
+
+types
+
+======================================================
+ARCHITECTURE
+======================================================
+
+TypeScript Strict
+
+Clean Architecture
+
+Feature-based architecture
+
+SOLID Principles
+
+Reusable components
+
+No duplicated code
+
+No hardcoded data
+
+Enterprise-level quality
+
+Production-ready
+
+======================================================
+FUTURE SUPPORT
+======================================================
+
+Bible audio
+
+Multi-version Bible
+
+Original language support
+
+Bible maps
+
+Bible dictionary
+
+Bible timeline
+
+Bible quiz
+
+Memory verses
+
+Church-wide reading challenge
+
+Bible statistics
+
+Offline reading
+
+PWA support
+
+Push notifications
+
+AI-assisted Bible search
+
+AI-assisted QT summary
+
+Everything must be scalable and maintainable.
