@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-background: 0 0% 100%;
+    --color-foreground: 0 0% 9%;
+    --color-surface: 0 0% 98%;
+    --color-surface-foreground: 0 0% 9%;
+    --color-border: 0 0% 90%;
+    --color-primary: 217 91% 60%;
+    --color-primary-foreground: 0 0% 100%;
+    --color-muted: 0 0% 96%;
+    --color-muted-foreground: 0 0% 45%;
+    --color-accent: 0 0% 96%;
+    --color-accent-foreground: 0 0% 9%;
+    --color-destructive: 0 84% 60%;
+    --color-destructive-foreground: 0 0% 100%;
+    --color-ring: 217 91% 60%;
+    --color-input: 0 0% 90%;
+    --color-success: 142 71% 45%;
+    --color-warning: 48 96% 53%;
+    --color-info: 217 91% 60%;
+    --color-danger: 0 84% 60%;
+  }
+
+  .dark {
+    --color-background: 0 0% 4%;
+    --color-foreground: 0 0% 98%;
+    --color-surface: 0 0% 9%;
+    --color-surface-foreground: 0 0% 98%;
+    --color-border: 0 0% 15%;
+    --color-primary: 217 91% 60%;
+    --color-primary-foreground: 0 0% 100%;
+    --color-muted: 0 0% 15%;
+    --color-muted-foreground: 0 0% 65%;
+    --color-accent: 0 0% 15%;
+    --color-accent-foreground: 0 0% 98%;
+    --color-destructive: 0 62% 30%;
+    --color-destructive-foreground: 0 0% 100%;
+    --color-ring: 217 91% 60%;
+    --color-input: 0 0% 15%;
+    --color-success: 142 71% 45%;
+    --color-warning: 48 96% 53%;
+    --color-info: 217 91% 60%;
+    --color-danger: 0 62% 30%;
+  }
+
+  * {
+    @apply border-[hsl(var(--color-border))];
+  }
+
+  body {
+    @apply bg-[hsl(var(--color-background))] text-[hsl(var(--color-foreground))] antialiased;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
