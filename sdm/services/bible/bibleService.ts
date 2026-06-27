@@ -95,8 +95,8 @@ export function parseReference(input: string): BibleReference | null {
     bookId: book.id,
     bookName: book.name,
     chapterNumber: Number(rawChapter),
-    startVerse: Number(rawStartVerse ?? 1),
-    endVerse: rawEndVerse ? Number(rawEndVerse) : rawStartVerse ? null : null,
+    startVerse: rawStartVerse ? Number(rawStartVerse) : 1,
+    endVerse: rawEndVerse ? Number(rawEndVerse) : null,
     rawText: input,
   };
 }

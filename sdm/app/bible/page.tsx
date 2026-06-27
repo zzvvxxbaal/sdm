@@ -95,7 +95,7 @@ export default function BiblePage() {
         <aside className="space-y-4">
           <Panel title="최근 본 본문" icon={<History className="h-4 w-4" />}>
             {historyItems.length ? historyItems.map((item) => (
-              <button key={item.id} onClick={() => goToChapter(item.bookName === "" ? "gen" : item.verseId.split("_")[0], item.chapterNumber)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
+              <button key={item.id} onClick={() => goToChapter(item.verseId.split("_")[0], item.chapterNumber)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
                 <p className="font-semibold text-[#171717] dark:text-[#f5f5f5]">{item.bookName} {item.chapterNumber}:{item.verseNumber}</p>
               </button>
             )) : <Empty label="최근 기록이 없습니다" />}

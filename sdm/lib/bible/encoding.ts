@@ -19,7 +19,8 @@ function decodeBuffer(buffer: Buffer, encoding: BibleEncoding): string {
   if (encoding === "utf-8") {
     return buffer.toString("utf-8");
   }
-  return new TextDecoder(encoding).decode(buffer);
+  const decoderEncoding = encoding === "cp949" ? "euc-kr" : encoding;
+  return new TextDecoder(decoderEncoding).decode(buffer);
 }
 
 /**

@@ -30,6 +30,10 @@ export function toDate(value: unknown) {
   return null;
 }
 
+function parseDateKey(dateKey: string) {
+  return new Date(`${dateKey}T00:00:00`);
+}
+
 export function buildSearchTokens(entry: SearchTokenSource) {
   const source = [
     entry.title,
@@ -85,7 +89,7 @@ export function computeLongestStreak(entries: QTEntry[]) {
   let current = 0;
   let previous: Date | null = null;
   keys.forEach((key) => {
-    const date = new Date(`${key}T00:00:00`);
+    const date = parseDateKey(key);
     if (previous && normalizeDateKey(addDays(previous, 1)) === key) current += 1;
     else current = 1;
     previous = date;
@@ -105,7 +109,7 @@ export function buildWeeklySummary(entries: QTEntry[], anchorDate: Date) {
   const weekStart = startOfWeek(anchorDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(anchorDate, { weekStartsOn: 1 });
   const rangeEntries = entries.filter((entry) => {
-    const date = new Date(`${entry.dateKey}T00:00:00`);
+    const date = parseDateKey(entry.dateKey);
     return date >= weekStart && date <= weekEnd;
   });
   return {

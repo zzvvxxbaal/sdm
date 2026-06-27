@@ -8,7 +8,6 @@ import {
   query,
   serverTimestamp,
   setDoc,
-  updateDoc,
   where,
 } from "firebase/firestore";
 import { db } from "@/firebase/config";
@@ -17,14 +16,25 @@ import type { BibleVerse } from "@/types/bible";
 
 const FAVORITES = COLLECTIONS.BIBLE_FAVORITES;
 const HISTORY = COLLECTIONS.BIBLE_HISTORY;
+const FAVORITES_LIMIT = 30;
+const HISTORY_LIMIT = 12;
 
 function favoriteDocId(userId: string, verseId: string) {
   return `${userId}_${verseId}`;
 }
 
+function historyDocId(userId: string, verseId: string) {
+  return `${userId}_${verseId}`;
+}
+
 export async function listBibleFavorites(userId: string) {
   const snapshot = await getDocs(
-    query(collection(db, FAVORITES), where("userId", "==", userId), orderBy("createdAt", "desc"), limit(30)),
+    query(
+      collection(db, FAVORITES),
+      where("userId", "==", userId),
+      orderBy("createdAt", "desc"),
+      limit(FAVORITES_LIMIT),
+    ),
   );
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
 }
@@ -48,14 +58,7 @@ export async function toggleBibleFavorite(userId: string, verse: BibleVerse, isF
 }
 
 export async function recordBibleHistory(userId: string, verse: BibleVerse) {
-  const snapshot = await getDocs(
-    query(collection(db, HISTORY), where("userId", "==", userId), where("verseId", "==", verse.id), limit(1)),
-  );
-  if (!snapshot.empty) {
-    await updateDoc(snapshot.docs[0].ref, { viewedAt: serverTimestamp() });
-    return;
-  }
-  await setDoc(doc(collection(db, HISTORY)), {
+  await setDoc(doc(db, HISTORY, historyDocId(userId, verse.id)), {
     userId,
     verseId: verse.id,
     bookId: verse.bookId,
@@ -68,7 +71,12 @@ export async function recordBibleHistory(userId: string, verse: BibleVerse) {
 
 export async function listBibleHistory(userId: string) {
   const snapshot = await getDocs(
-    query(collection(db, HISTORY), where("userId", "==", userId), orderBy("viewedAt", "desc"), limit(12)),
+    query(
+      collection(db, HISTORY),
+      where("userId", "==", userId),
+      orderBy("viewedAt", "desc"),
+      limit(HISTORY_LIMIT),
+    ),
   );
   return snapshot.docs.map((item) => ({ id: item.id, ...item.data() }));
 }

@@ -3,7 +3,6 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Field, Input, Select, Textarea, Button, Card } from "@/components/ui";
-import type { BibleReference } from "@/types/bible";
 import type { QTEntry, QTEntryInput, QTVisibility } from "@/types/qt";
 import { parseReference } from "@/services/bible/bibleService";
 
@@ -57,7 +56,7 @@ export function QTEntryForm({ selectedDate, editing, onSubmit, onCancel, submitt
   }, [editing, reset, selectedDate]);
 
   const submit = handleSubmit(async (values) => {
-    const reference = parseReference(values.reference) as BibleReference | null;
+    const reference = parseReference(values.reference);
     if (!reference) {
       setError("reference", { message: "올바른 성경 참조를 입력해주세요. 예: 요 3:16" });
       return;
