@@ -6,8 +6,8 @@ export interface ReadingPlan {
   assignments: ReadingPlanAssignment[];
   isActive: boolean;
   isDefault: boolean;
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }
 
 export interface ReadingPlanInput {
@@ -32,6 +32,6 @@ export interface ReadingProgress {
   planId: string;
   progressId: string;
   completedAssignments: number[];
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: unknown;
+  updatedAt?: unknown;
 }

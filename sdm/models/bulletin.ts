@@ -1,15 +1,17 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
 import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import { BULLETIN_RESOURCE_KINDS, type BulletinResourceKind } from "@/types/bulletin";
 
 export const bulletinSchema = z.object({
   id: z.string().min(1),
   title: z.string().min(1).max(200),
   content: z.string().nullable().optional(),
-  fileURL: z.string().url().nullable().optional(),
+  fileURL: z.string().nullable().optional(),
   fileName: z.string().nullable().optional(),
   fileSize: z.number().int().min(0).nullable().optional(),
   fileType: z.string().nullable().optional(),
+  resourceKind: z.enum(BULLETIN_RESOURCE_KINDS).default("url"),
   date: z.string().min(1),
   sermonTitle: z.string().nullable().optional(),
   preacher: z.string().nullable().optional(),
@@ -33,6 +35,7 @@ export interface BulletinModel extends FirestoreBase {
   fileName: string | null;
   fileSize: number | null;
   fileType: string | null;
+  resourceKind: BulletinResourceKind;
   date: string;
   sermonTitle: string | null;
   preacher: string | null;
@@ -52,6 +55,7 @@ export const bulletinConverter = {
       fileName: bulletin.fileName,
       fileSize: bulletin.fileSize,
       fileType: bulletin.fileType,
+      resourceKind: bulletin.resourceKind,
       date: bulletin.date,
       sermonTitle: bulletin.sermonTitle,
       preacher: bulletin.preacher,
@@ -78,6 +82,7 @@ export const bulletinConverter = {
       fileName: (data.fileName as string) ?? null,
       fileSize: (data.fileSize as number) ?? null,
       fileType: (data.fileType as string) ?? null,
+      resourceKind: (data.resourceKind as BulletinResourceKind) ?? "url",
       date: data.date as string,
       sermonTitle: (data.sermonTitle as string) ?? null,
       preacher: (data.preacher as string) ?? null,

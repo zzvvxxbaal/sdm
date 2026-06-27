@@ -26,7 +26,6 @@ function entryKey(entry: QTEntry): string | null {
   return dayKey(withDate.date) ?? dayKey(entry.createdAt);
 }
 
-/** Count consecutive days (ending today or yesterday) that have a QT entry. */
 export function computeStreak(keys: string[], today: Date): number {
   const set = new Set(keys);
   const cursor = new Date(today);
@@ -47,14 +46,10 @@ export function useActivityStreak(userId: string | undefined): {
   loading: boolean;
 } {
   const [streak, setStreak] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(userId));
 
   useEffect(() => {
-    if (!userId) {
-      setStreak(0);
-      setLoading(false);
-      return;
-    }
+    if (!userId) return;
     let active = true;
     void (async () => {
       setLoading(true);
@@ -76,6 +71,10 @@ export function useActivityStreak(userId: string | undefined): {
       active = false;
     };
   }, [userId]);
+
+  if (!userId) {
+    return { streak: 0, loading: false };
+  }
 
   return { streak, loading };
 }

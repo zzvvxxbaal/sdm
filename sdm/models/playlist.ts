@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
 import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import { WORSHIP_PLAYLIST_CATEGORIES, type WorshipPlaylistCategory } from "@/types/worship";
 
 export const playlistSchema = z.object({
   id: z.string().min(1),
@@ -17,7 +18,8 @@ export const playlistSchema = z.object({
       order: z.number().int().min(0),
     })
   ).default([]),
-  category: z.enum(["worship", "praise", "contemplation", "special", "other"]).default("worship"),
+  category: z.enum(WORSHIP_PLAYLIST_CATEGORIES).default("worship"),
+  favoriteCount: z.number().int().min(0).default(0),
   isActive: z.boolean().default(true),
   createdAt: z.any(),
   updatedAt: z.any(),
@@ -41,7 +43,8 @@ export interface PlaylistModel extends FirestoreBase {
   name: string;
   description: string | null;
   songs: PlaylistSong[];
-  category: "worship" | "praise" | "contemplation" | "special" | "other";
+  category: WorshipPlaylistCategory;
+  favoriteCount: number;
   isActive: boolean;
 }
 
@@ -52,6 +55,7 @@ export const playlistConverter = {
       description: playlist.description,
       songs: playlist.songs,
       category: playlist.category,
+      favoriteCount: playlist.favoriteCount,
       isActive: playlist.isActive,
       createdAt: playlist.createdAt,
       updatedAt: playlist.updatedAt,
@@ -68,7 +72,8 @@ export const playlistConverter = {
       name: data.name as string,
       description: (data.description as string) ?? null,
       songs: (data.songs as PlaylistSong[]) ?? [],
-      category: (data.category as PlaylistModel["category"]) ?? "worship",
+      category: (data.category as WorshipPlaylistCategory) ?? "worship",
+      favoriteCount: (data.favoriteCount as number) ?? 0,
       isActive: (data.isActive as boolean) ?? true,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,

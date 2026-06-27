@@ -44,9 +44,7 @@ export function useMemberAdmin() {
       ]);
       setMembers(memberList);
       setTeams(teamList.map((t) => ({ id: t.id, name: t.name })));
-      setCells(
-        cellList.map((c) => ({ id: c.id, name: c.name, teamId: c.teamId }))
-      );
+      setCells(cellList.map((c) => ({ id: c.id, name: c.name, teamId: c.teamId })));
     } catch {
       setError("회원 목록을 불러오지 못했습니다.");
     } finally {
@@ -55,22 +53,42 @@ export function useMemberAdmin() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    void (async () => {
+      try {
+        const [memberList, teamList, cellList] = await Promise.all([
+          listAllMembers(),
+          getAllTeams(),
+          getAllCells(),
+        ]);
+        if (!active) return;
+        setMembers(memberList);
+        setTeams(teamList.map((t) => ({ id: t.id, name: t.name })));
+        setCells(cellList.map((c) => ({ id: c.id, name: c.name, teamId: c.teamId })));
+      } catch {
+        if (active) setError("회원 목록을 불러오지 못했습니다.");
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const byStatus = useMemo(
     () => ({
       [ApprovalStatus.PENDING]: members.filter(
-        (m) => m.approvalStatus === ApprovalStatus.PENDING
+        (m) => m.approvalStatus === ApprovalStatus.PENDING,
       ),
       [ApprovalStatus.APPROVED]: members.filter(
-        (m) => m.approvalStatus === ApprovalStatus.APPROVED
+        (m) => m.approvalStatus === ApprovalStatus.APPROVED,
       ),
       [ApprovalStatus.REJECTED]: members.filter(
-        (m) => m.approvalStatus === ApprovalStatus.REJECTED
+        (m) => m.approvalStatus === ApprovalStatus.REJECTED,
       ),
     }),
-    [members]
+    [members],
   );
 
   const approve = useCallback(
@@ -79,7 +97,7 @@ export function useMemberAdmin() {
       await approveMember(uid, user.uid);
       await load();
     },
-    [user, load]
+    [user, load],
   );
 
   const reject = useCallback(
@@ -88,7 +106,7 @@ export function useMemberAdmin() {
       await rejectMember(uid, user.uid, reason);
       await load();
     },
-    [user, load]
+    [user, load],
   );
 
   const assign = useCallback(
@@ -96,7 +114,7 @@ export function useMemberAdmin() {
       await updatePrivilegedFields(uid, input);
       await load();
     },
-    [load]
+    [load],
   );
 
   const setActive = useCallback(
@@ -104,7 +122,7 @@ export function useMemberAdmin() {
       await setActiveState(uid, isActive);
       await load();
     },
-    [load]
+    [load],
   );
 
   return {

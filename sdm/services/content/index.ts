@@ -8,6 +8,9 @@ export {
 
 export {
   getAllEvents,
+  getScheduleEventById,
+  getMonthlyScheduleEvents,
+  getWeeklyScheduleEvents,
   createEvent,
   updateEvent,
   deleteEvent,
@@ -16,6 +19,7 @@ export {
 
 export {
   getAllBulletins,
+  getBulletinById,
   createBulletin,
   updateBulletin,
   deleteBulletin,
@@ -24,8 +28,12 @@ export {
 
 export {
   getAllPlaylists,
+  getWorshipPlaylistById,
   createPlaylist,
   updatePlaylist,
   deletePlaylist,
+  getFavoriteSongs,
+  getFavoriteSongIds,
+  toggleFavoriteSong,
   type PlaylistInput,
 } from "./playlistService";

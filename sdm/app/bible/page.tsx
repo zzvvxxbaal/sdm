@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { BookOpen, History, Search } from "lucide-react";
 import { BookSelector, ChapterViewer, BibleSearch, VerseCard } from "@/features/bible";
@@ -12,7 +12,7 @@ import { listBibleFavorites, listBibleHistory, recordBibleHistory } from "@/serv
 
 type ViewMode = "reader" | "search";
 
-export default function BiblePage() {
+function BiblePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useAuth();
@@ -133,4 +133,13 @@ function Panel({ title, icon, children }: { title: string; icon: React.ReactNode
 
 function Empty({ label }: { label: string }) {
   return <p className="rounded-xl bg-[#fafafa] px-4 py-6 text-center text-sm text-[#a3a3a3] dark:bg-[#1c1c1e]">{label}</p>;
+}
+
+
+export default function BiblePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#f8fafc] dark:bg-[#0a0a0a]" />}>
+      <BiblePageContent />
+    </Suspense>
+  );
 }

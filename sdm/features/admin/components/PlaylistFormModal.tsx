@@ -10,10 +10,8 @@ import type { PlaylistModel, PlaylistSong } from "@/models/playlist";
 
 const CATEGORY_LABELS: Record<PlaylistModel["category"], string> = {
   worship: "예배",
-  praise: "찬양",
-  contemplation: "묵상",
-  special: "특송",
-  other: "기타",
+  qt_music: "QT 음악",
+  personal_devotion: "개인 경건",
 };
 
 interface SongRow {
@@ -89,7 +87,7 @@ export function PlaylistFormModal({
     <Modal isOpen={isOpen} onClose={onClose} title={initial ? "재생목록 수정" : "재생목록 추가"}>
       <div className="space-y-3">
         <Field label="이름" required>
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 6월 4주 콘티" />
+          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="예: 주일 예배 콘티" />
         </Field>
         <Field label="분류">
           <Select
