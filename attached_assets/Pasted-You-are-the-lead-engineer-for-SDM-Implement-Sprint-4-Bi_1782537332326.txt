@@ -1,0 +1,126 @@
+You are the lead engineer for SDM.
+
+Implement Sprint 4: Bible System + QT (Quiet Time).
+
+This is the spiritual core of the application.
+
+Do not use mock data.
+Use real Firestore integration and clean architecture.
+
+========================
+BIBLE SYSTEM
+========================
+
+Create a full Bible module with:
+
+- Book selector
+- Chapter selector
+- Verse viewer
+- Search (book, reference, keyword)
+- Favorites
+- Recent history
+- Today’s verse integration
+- Link from sermons / bulletins / announcements
+
+Bible data is already available in the project.
+
+Use optimized indexed search.
+Do not scan entire dataset on each query.
+
+========================
+QT SYSTEM
+========================
+
+Create a complete Quiet Time system.
+
+QT includes:
+
+- Bible reference
+- Title
+- Meditation
+- Prayer
+- Application
+- Tags
+- Emotion (optional)
+- Visibility settings
+
+========================
+QT VISIBILITY
+
+Support:
+
+- Private (only me)
+- Cell group
+- Team group
+- Church-wide
+- Leaders only
+- Admin only
+
+Implement strict Firestore security rules.
+
+========================
+QT FEATURES
+
+- Create QT
+- Edit QT
+- Delete QT
+- Favorite QT
+- Search QT
+- Filter QT by date, tag, and visibility
+
+========================
+QT CALENDAR
+
+- Monthly calendar view
+- Highlight days with QT
+- Streak tracking
+- Weekly and monthly summary
+
+========================
+INTEGRATION
+
+Connect QT with:
+
+- Bible module (verse selection)
+- Home dashboard
+- Sermons
+- Bulletins
+- Prayer requests
+
+Clicking any Bible reference opens Bible module directly.
+
+========================
+PERFORMANCE
+
+- Indexed queries
+- Cached results
+- Fast search
+- Lazy loading
+
+========================
+UI / UX
+
+- Mobile-first
+- Apple + Toss style
+- Card-based design
+- Dark mode support
+- Smooth transitions
+- Loading skeletons
+
+========================
+ARCHITECTURE
+
+- Feature-based structure
+- TypeScript strict mode
+- Firestore repositories
+- Zod validation
+- Reusable components only
+
+========================
+AFTER COMPLETION
+
+- Run type check
+- Fix all errors
+- Output file structure
+- List all Firestore collections used
+- Summarize implemented features
