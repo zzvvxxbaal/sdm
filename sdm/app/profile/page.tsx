@@ -1,78 +1,167 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 import {
-  User,
+  Pencil,
+  Phone,
+  Cake,
+  Users,
+  Layers,
+  Briefcase,
+  CalendarDays,
   BookOpen,
   PenLine,
   Heart,
-  Settings,
-  ChevronRight,
+  CheckCircle2,
   LogOut,
-  Bell,
-  Shield,
 } from "lucide-react";
 
-export default function ProfilePage() {
+import { useAuth, withApproval } from "@/features/auth";
+import { ROUTES } from "@/constants/routes";
+import {
+  GENDER_LABELS,
+  CHURCH_POSITION_LABELS,
+  APPROVAL_STATUS_LABELS,
+  APPROVAL_STATUS_COLORS,
+} from "@/types/member";
+import { ROLE_LABELS, ROLE_COLORS } from "@/types/role";
+import { formatDate } from "@/lib/utils";
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  CardHeader,
+  PageHeader,
+  StatItem,
+} from "@/components/ui";
+
+function ProfilePage() {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
+  if (!user) return null;
+
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-120px)]">
-      {/* Profile Header */}
-      <div className="px-4 pt-4 pb-6">
-        <div className="flex items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eff6ff] text-[#2563EB] dark:bg-[#1e3a5f]">
-            <User className="h-8 w-8" />
-          </div>
-          <div>
-            <h2 className="text-lg font-bold text-[#171717] dark:text-[#f5f5f5]">
-              회원님
-            </h2>
-            <p className="text-sm text-[#a3a3a3]">서대문교회 청년부</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats */}
-      <div className="px-4 pb-4">
-        <div className="grid grid-cols-3 gap-3">
-          <StatCard icon={BookOpen} label="성경 읽기" value="0장" />
-          <StatCard icon={PenLine} label="QT 작성" value="0편" />
-          <StatCard icon={Heart} label="방문 일수" value="0회" />
-        </div>
-      </div>
-
-      {/* Menu Sections */}
-      <div className="flex-1 px-4 py-4 space-y-6">
-        <MenuSection title="나의 활동">
-          <MenuItem icon={BookOpen} label="성경 읽기 기록" href="/bible" />
-          <MenuItem icon={PenLine} label="QT 일지" href="/qt" />
-          <MenuItem icon={Heart} label="배우니 공간" href="/qt" />
-        </MenuSection>
-
-        <MenuSection title="설정">
-          <MenuItem icon={Bell} label="알림 설정" href="/settings" />
-          <MenuItem icon={Shield} label="계정 정보" href="/settings" />
-          <MenuItem icon={Settings} label="애플리케이션 설정" href="/settings" />
-        </MenuSection>
-
-        <MenuSection title="">
-          <button
-            className={cn(
-              "w-full flex items-center gap-3 px-4 py-3.5 rounded-xl",
-              "bg-white border border-[#e5e5e5] text-[#ef4444]",
-              "hover:bg-[#fef2f2] transition-colors",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:hover:bg-[#3f1f1f]"
-            )}
+    <div className="mx-auto w-full max-w-2xl px-4 py-6">
+      <PageHeader
+        title="내 프로필"
+        action={
+          <Button
+            size="sm"
+            variant="secondary"
+            onClick={() => router.push(ROUTES.PROFILE_EDIT)}
           >
-            <LogOut className="h-5 w-5" />
-            <span className="text-sm font-semibold">로그아웃</span>
-          </button>
-        </MenuSection>
+            <Pencil className="h-3.5 w-3.5" />
+            편집
+          </Button>
+        }
+      />
+
+      <Card className="mb-4">
+        <div className="flex items-center gap-4">
+          <Avatar src={user.photoURL} name={user.displayName} size={64} />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <h2 className="truncate text-lg font-bold text-[#171717] dark:text-[#f5f5f5]">
+                {user.displayName ?? "이름 미설정"}
+              </h2>
+              {user.generation && (
+                <Badge color="#2563EB">{user.generation}</Badge>
+              )}
+            </div>
+            <p className="truncate text-sm text-[#737373] dark:text-[#a3a3a3]">
+              {user.email}
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <Badge color={ROLE_COLORS[user.role]}>
+                {ROLE_LABELS[user.role]}
+              </Badge>
+              <Badge color={APPROVAL_STATUS_COLORS[user.approvalStatus]}>
+                {APPROVAL_STATUS_LABELS[user.approvalStatus]}
+              </Badge>
+            </div>
+          </div>
+        </div>
+        {user.introduction && (
+          <p className="mt-4 rounded-xl bg-[#fafafa] p-3 text-sm text-[#525252] dark:bg-[#262626] dark:text-[#d4d4d4]">
+            {user.introduction}
+          </p>
+        )}
+      </Card>
+
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatItem
+          icon={CheckCircle2}
+          label="출석"
+          value={user.statistics.attendanceCount}
+          suffix="회"
+        />
+        <StatItem
+          icon={Heart}
+          label="출석률"
+          value={user.statistics.attendanceRate}
+          suffix="%"
+        />
+        <StatItem
+          icon={BookOpen}
+          label="QT"
+          value={user.statistics.qtCount}
+          suffix="편"
+        />
+        <StatItem
+          icon={PenLine}
+          label="기도"
+          value={user.statistics.prayerCount}
+          suffix="건"
+        />
       </div>
+
+      <Card className="mb-4">
+        <CardHeader title="개인 정보" />
+        <dl className="space-y-3">
+          <InfoRow icon={Cake} label="출생연도" value={user.birthYear ? `${user.birthYear}년` : "-"} />
+          <InfoRow
+            icon={Users}
+            label="성별"
+            value={user.gender ? GENDER_LABELS[user.gender] : "-"}
+          />
+          <InfoRow icon={Phone} label="전화번호" value={user.phoneNumber ?? "-"} />
+        </dl>
+      </Card>
+
+      <Card className="mb-4">
+        <CardHeader title="교회 정보" />
+        <dl className="space-y-3">
+          <InfoRow icon={Layers} label="팀" value={user.teamName ?? "미배정"} />
+          <InfoRow icon={Users} label="셀" value={user.cellName ?? "미배정"} />
+          <InfoRow icon={Briefcase} label="사역" value={user.ministry ?? "없음"} />
+          <InfoRow
+            icon={CheckCircle2}
+            label="직분"
+            value={CHURCH_POSITION_LABELS[user.position]}
+          />
+          <InfoRow
+            icon={CalendarDays}
+            label="등록일"
+            value={user.registeredAt ? formatDate(user.registeredAt) : "-"}
+          />
+        </dl>
+      </Card>
+
+      <Button
+        fullWidth
+        variant="secondary"
+        onClick={() => signOut()}
+        className="text-[#ef4444]"
+      >
+        <LogOut className="h-4 w-4" />
+        로그아웃
+      </Button>
     </div>
   );
 }
 
-function StatCard({
+function InfoRow({
   icon: Icon,
   label,
   value,
@@ -82,62 +171,16 @@ function StatCard({
   value: string;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center gap-1.5 rounded-2xl border border-[#e5e5e5] bg-white p-4",
-        "dark:bg-[#1c1c1e] dark:border-[#2c2c2e]"
-      )}
-    >
-      <Icon className="h-5 w-5 text-[#2563EB]" />
-      <span className="text-lg font-bold text-[#171717] dark:text-[#f5f5f5]">{value}</span>
-      <span className="text-[10px] text-[#a3a3a3]">{label}</span>
+    <div className="flex items-center justify-between gap-3">
+      <dt className="flex items-center gap-2 text-sm text-[#737373] dark:text-[#a3a3a3]">
+        <Icon className="h-4 w-4 text-[#a3a3a3]" />
+        {label}
+      </dt>
+      <dd className="text-sm font-medium text-[#171717] dark:text-[#f5f5f5]">
+        {value}
+      </dd>
     </div>
   );
 }
 
-function MenuSection({
-  title,
-  children,
-}: {
-  title: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <div>
-      {title && (
-        <h3 className="text-xs font-bold text-[#a3a3a3] uppercase tracking-wider mb-2 px-1">
-          {title}
-        </h3>
-      )}
-      <div className="space-y-1">
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function MenuItem({
-  icon: Icon,
-  label,
-  href,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  href: string;
-}) {
-  return (
-    <a
-      href={href}
-      className={cn(
-        "flex items-center gap-3 px-4 py-3.5 rounded-xl",
-        "bg-white border border-[#e5e5e5] text-[#171717]",
-        "hover:bg-[#fafafa] transition-colors",
-        "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5] dark:hover:bg-[#262626]"
-      )}
-    >
-      <Icon className="h-5 w-5 text-[#2563EB]" />
-      <span className="flex-1 text-sm font-semibold">{label}</span>
-      <ChevronRight className="h-4 w-4 text-[#a3a3a3]" />
-    </a>
-  );
-}
+export default withApproval(ProfilePage);

@@ -1,6 +1,7 @@
 export const UserRole = {
   USER: "user",
   MEMBER: "member",
+  LEADER: "leader",
   ADMIN: "admin",
   SUPER_ADMIN: "super_admin",
 } as const;
@@ -9,6 +10,8 @@ export type UserRoleValue = (typeof UserRole)[keyof typeof UserRole];
 
 export const AUTH_ERRORS = {
   INVALID_CREDENTIALS: "auth/invalid-credentials",
+  INVALID_LOGIN_CREDENTIALS: "auth/invalid-login-credentials",
+  WRONG_PASSWORD: "auth/wrong-password",
   USER_NOT_FOUND: "auth/user-not-found",
   EMAIL_IN_USE: "auth/email-already-in-use",
   WEAK_PASSWORD: "auth/weak-password",
@@ -22,6 +25,8 @@ export const AUTH_ERRORS = {
 
 export const AUTH_ERROR_MESSAGES: Record<string, string> = {
   [AUTH_ERRORS.INVALID_CREDENTIALS]: "이메일 또는 비밀번호가 올바르지 않습니다.",
+  [AUTH_ERRORS.INVALID_LOGIN_CREDENTIALS]: "이메일 또는 비밀번호가 올바르지 않습니다.",
+  [AUTH_ERRORS.WRONG_PASSWORD]: "이메일 또는 비밀번호가 올바르지 않습니다.",
   [AUTH_ERRORS.USER_NOT_FOUND]: "등록되지 않은 이메일입니다.",
   [AUTH_ERRORS.EMAIL_IN_USE]: "이미 사용 중인 이메일입니다.",
   [AUTH_ERRORS.WEAK_PASSWORD]: "비밀번호는 6자 이상이어야 합니다.",

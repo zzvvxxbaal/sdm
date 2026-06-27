@@ -3,9 +3,13 @@ export const ROUTES = {
   LOGIN: "/login",
   REGISTER: "/register",
   FORGOT_PASSWORD: "/forgot-password",
+  VERIFY_EMAIL: "/verify-email",
+  COMPLETE_PROFILE: "/complete-profile",
+  PENDING_APPROVAL: "/pending-approval",
 
   DASHBOARD: "/dashboard",
   PROFILE: "/profile",
+  PROFILE_EDIT: "/profile/edit",
   SETTINGS: "/settings",
 
   MEMBER: "/members",

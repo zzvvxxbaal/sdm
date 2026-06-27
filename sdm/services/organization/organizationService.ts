@@ -10,6 +10,8 @@ const settingsRef = doc(db, COLLECTIONS.ORGANIZATION_SETTINGS, SETTINGS_DOC_ID).
   organizationSettingsConverter
 );
 
+const settingsWriteRef = doc(db, COLLECTIONS.ORGANIZATION_SETTINGS, SETTINGS_DOC_ID);
+
 export async function getOrganizationSettings(): Promise<OrganizationSettingsModel | null> {
   const snapshot = await getDoc(settingsRef);
   if (!snapshot.exists()) return null;
@@ -20,7 +22,7 @@ export async function initializeOrganizationSettings(): Promise<void> {
   const snapshot = await getDoc(settingsRef);
   if (snapshot.exists()) return;
 
-  await setDoc(settingsRef, {
+  await setDoc(settingsWriteRef, {
     cellLabel: { singular: "순", plural: "순들" },
     teamLabel: { singular: "팀", plural: "팀들" },
     maxTeams: 0,
@@ -47,7 +49,7 @@ export async function updateOrganizationSettings(
     updatedBy: string;
   }>
 ): Promise<void> {
-  await updateDoc(settingsRef, {
+  await updateDoc(settingsWriteRef, {
     ...data,
     updatedAt: serverTimestamp(),
   });
@@ -58,7 +60,7 @@ export async function updateCellLabel(
   plural: string,
   updatedBy?: string
 ): Promise<void> {
-  await updateDoc(settingsRef, {
+  await updateDoc(settingsWriteRef, {
     cellLabel: { singular, plural },
     updatedAt: serverTimestamp(),
     updatedBy: updatedBy ?? null,
@@ -70,7 +72,7 @@ export async function updateTeamLabel(
   plural: string,
   updatedBy?: string
 ): Promise<void> {
-  await updateDoc(settingsRef, {
+  await updateDoc(settingsWriteRef, {
     teamLabel: { singular, plural },
     updatedAt: serverTimestamp(),
     updatedBy: updatedBy ?? null,

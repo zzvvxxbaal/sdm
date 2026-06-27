@@ -40,7 +40,7 @@ export default function RegisterPage() {
         password: data.password,
         displayName: data.displayName,
       });
-      router.push(ROUTES.DASHBOARD);
+      router.push(ROUTES.VERIFY_EMAIL);
     } catch {
       // Error handled by AuthProvider
     }

@@ -4,7 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 
-import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validation/auth";
+import { useAuth } from "@/features/auth";
+import {
+  forgotPasswordSchema,
+  type ForgotPasswordFormData,
+} from "@/lib/validation/auth";
 
 import {
   AuthLayout,
@@ -17,6 +21,7 @@ import {
 } from "@/components/auth";
 
 export default function ForgotPasswordPage() {
+  const { resetPassword } = useAuth();
   const [isSent, setIsSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,11 +38,14 @@ export default function ForgotPasswordPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // TODO: Implement Firebase password reset
-      console.log("Password reset requested for:", data.email);
+      await resetPassword(data.email);
       setIsSent(true);
-    } catch {
-      setError("비밀번호 재설정 요청 중 오류가 발생했습니다.");
+    } catch (err) {
+      const message =
+        err && typeof err === "object" && "message" in err
+          ? String((err as { message: unknown }).message)
+          : "비밀번호 재설정 요청 중 오류가 발생했습니다.";
+      setError(message);
     } finally {
       setIsLoading(false);
     }

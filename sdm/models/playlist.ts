@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const playlistSchema = z.object({
   id: z.string().min(1),
@@ -58,7 +59,11 @@ export const playlistConverter = {
       updatedBy: playlist.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<PlaylistModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<PlaylistModel, "id"> {
+    const data = snapshot.data(options);
     return {
       name: data.name as string,
       description: (data.description as string) ?? null,

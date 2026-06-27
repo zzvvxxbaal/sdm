@@ -1,19 +1,8 @@
-export enum UserRole {
-  USER = "user",
-  MEMBER = "member",
-  ADMIN = "admin",
-  SUPER_ADMIN = "super_admin",
-}
+import type { UserProfile } from "./user";
 
-export interface UserProfile {
-  uid: string;
-  email: string | null;
-  displayName: string | null;
-  photoURL: string | null;
-  role: UserRole;
-  createdAt: string;
-  updatedAt: string;
-}
+export { UserRole } from "./role";
+
+export type AuthProviderId = "password" | "google" | "kakao";
 
 export interface AuthState {
   user: UserProfile | null;
@@ -39,10 +28,15 @@ export interface SignUpCredentials {
 }
 
 export interface AuthContextValue extends AuthState {
-  signIn: (credentials: SignInCredentials) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signInWithKakao: () => Promise<void>;
+  signIn: (credentials: SignInCredentials) => Promise<UserProfile>;
+  signInWithGoogle: () => Promise<UserProfile>;
+  signInWithKakao: () => Promise<UserProfile>;
   signOut: () => Promise<void>;
-  signUp: (credentials: SignUpCredentials) => Promise<void>;
+  signUp: (credentials: SignUpCredentials) => Promise<UserProfile>;
+  resetPassword: (email: string) => Promise<void>;
+  sendVerificationEmail: () => Promise<void>;
+  refreshProfile: () => Promise<UserProfile | null>;
   clearError: () => void;
 }
+
+export type { UserProfile };

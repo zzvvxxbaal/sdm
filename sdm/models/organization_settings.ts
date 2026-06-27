@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const cellLabelSchema = z.object({
   singular: z.string().min(1).max(20).default("순"),
@@ -61,7 +62,11 @@ export const organizationSettingsConverter = {
       updatedBy: settings.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<OrganizationSettingsModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<OrganizationSettingsModel, "id"> {
+    const data = snapshot.data(options);
     return {
       cellLabel: (data.cellLabel as { singular: string; plural: string }) ?? { singular: "순", plural: "순들" },
       teamLabel: (data.teamLabel as { singular: string; plural: string }) ?? { singular: "팀", plural: "팀들" },

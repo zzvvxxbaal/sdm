@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const notificationSchema = z.object({
   id: z.string().min(1),
@@ -47,7 +48,11 @@ export const notificationConverter = {
       updatedBy: notification.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<NotificationModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<NotificationModel, "id"> {
+    const data = snapshot.data(options);
     return {
       userId: data.userId as string,
       type: (data.type as NotificationModel["type"]) ?? "system",

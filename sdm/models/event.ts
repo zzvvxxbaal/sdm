@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const eventSchema = z.object({
   id: z.string().min(1),
@@ -56,7 +57,11 @@ export const eventConverter = {
       updatedBy: event.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<EventModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<EventModel, "id"> {
+    const data = snapshot.data(options);
     return {
       title: data.title as string,
       description: (data.description as string) ?? null,

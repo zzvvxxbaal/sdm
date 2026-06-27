@@ -3,89 +3,100 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   signOut as firebaseSignOut,
-  GoogleAuthProvider,
+  sendPasswordResetEmail,
+  sendEmailVerification,
   updateProfile,
   type UserCredential,
 } from "firebase/auth";
 
-import { auth, db } from "@/firebase/config";
+import { auth } from "@/firebase/config";
+import { getProvider } from "./providers";
 import {
-  doc,
-  setDoc,
-  getDoc,
-  serverTimestamp,
-  updateDoc,
-  Timestamp,
-} from "firebase/firestore";
-
-import { UserRole, type AuthError, type SignInCredentials, type SignUpCredentials } from "@/types/auth";
-import { AUTH_ERRORS, AUTH_ERROR_MESSAGES, DEFAULT_AUTH_ERROR_MESSAGE } from "@/constants/auth";
-
-const googleProvider = new GoogleAuthProvider();
+  createInitialProfile,
+  ensureProfile,
+  getProfile,
+  updateLastLogin,
+} from "@/services/user";
+import type { AuthError, SignInCredentials, SignUpCredentials } from "@/types/auth";
+import type { UserProfile } from "@/types/user";
+import {
+  AUTH_ERRORS,
+  AUTH_ERROR_MESSAGES,
+  DEFAULT_AUTH_ERROR_MESSAGE,
+} from "@/constants/auth";
 
 function normalizeAuthError(error: unknown): AuthError {
+  if (error instanceof Error && !("code" in error)) {
+    return { code: AUTH_ERRORS.UNKNOWN, message: error.message };
+  }
   const firebaseError = error as { code?: string; message?: string };
   const code = firebaseError?.code ?? AUTH_ERRORS.UNKNOWN;
   const message = AUTH_ERROR_MESSAGES[code] ?? DEFAULT_AUTH_ERROR_MESSAGE;
   return { code, message };
 }
 
-async function createUserProfile(userCredential: UserCredential, displayName?: string): Promise<void> {
-  const { user } = userCredential;
-  const userRef = doc(db, "users", user.uid);
-  const now = new Date().toISOString();
-
-  const userProfile = {
-    uid: user.uid,
-    email: user.email,
-    displayName: displayName ?? user.displayName,
-    photoURL: user.photoURL,
-    role: UserRole.USER,
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  await setDoc(userRef, userProfile);
-}
-
-async function getUserProfile(uid: string): Promise<{ role: string } | null> {
-  const userRef = doc(db, "users", uid);
-  const snapshot = await getDoc(userRef);
-  if (snapshot.exists()) {
-    return snapshot.data() as { role: string };
-  }
-  return null;
-}
-
-export async function signIn(credentials: SignInCredentials): Promise<UserCredential> {
+export async function signIn(
+  credentials: SignInCredentials
+): Promise<UserProfile> {
   try {
-    return await signInWithEmailAndPassword(auth, credentials.email, credentials.password);
+    const result = await signInWithEmailAndPassword(
+      auth,
+      credentials.email,
+      credentials.password
+    );
+    const profile = await ensureProfile({
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      photoURL: result.user.photoURL,
+      emailVerified: result.user.emailVerified,
+    });
+    await updateLastLogin(result.user.uid);
+    return { ...profile, emailVerified: result.user.emailVerified };
   } catch (error) {
     throw normalizeAuthError(error);
   }
 }
 
-export async function signInWithGoogle(): Promise<UserCredential> {
+export async function signInWithGoogle(): Promise<UserProfile> {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    const profile = await getUserProfile(result.user.uid);
-    if (!profile) {
-      await createUserProfile(result);
-    }
-    return result;
+    const result = await signInWithPopup(auth, getProvider("google"));
+    const profile = await ensureProfile({
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      photoURL: result.user.photoURL,
+      emailVerified: result.user.emailVerified,
+    });
+    await updateLastLogin(result.user.uid);
+    return { ...profile, emailVerified: result.user.emailVerified };
   } catch (error) {
     throw normalizeAuthError(error);
   }
 }
 
-export async function signInWithKakao(): Promise<void> {
-  // Kakao authentication is reserved for future implementation.
-  throw new Error("Kakao authentication is not yet implemented.");
+export async function signInWithKakao(): Promise<UserProfile> {
+  try {
+    const result = await signInWithPopup(auth, getProvider("kakao"));
+    const profile = await ensureProfile({
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: result.user.displayName,
+      photoURL: result.user.photoURL,
+      emailVerified: result.user.emailVerified,
+    });
+    await updateLastLogin(result.user.uid);
+    return { ...profile, emailVerified: result.user.emailVerified };
+  } catch (error) {
+    throw normalizeAuthError(error);
+  }
 }
 
-export async function signUp(credentials: SignUpCredentials): Promise<UserCredential> {
+export async function signUp(
+  credentials: SignUpCredentials
+): Promise<UserProfile> {
   try {
-    const userCredential = await createUserWithEmailAndPassword(
+    const result: UserCredential = await createUserWithEmailAndPassword(
       auth,
       credentials.email,
       credentials.password
@@ -95,10 +106,16 @@ export async function signUp(credentials: SignUpCredentials): Promise<UserCreden
       await updateProfile(auth.currentUser, {
         displayName: credentials.displayName,
       });
+      await sendEmailVerification(auth.currentUser);
     }
 
-    await createUserProfile(userCredential, credentials.displayName);
-    return userCredential;
+    return createInitialProfile({
+      uid: result.user.uid,
+      email: result.user.email,
+      displayName: credentials.displayName,
+      photoURL: result.user.photoURL,
+      emailVerified: result.user.emailVerified,
+    });
   } catch (error) {
     throw normalizeAuthError(error);
   }
@@ -112,14 +129,25 @@ export async function signOut(): Promise<void> {
   }
 }
 
-export async function updateUserRole(uid: string, role: string): Promise<void> {
-  const userRef = doc(db, "users", uid);
-  await updateDoc(userRef, {
-    role,
-    updatedAt: new Date().toISOString(),
-  });
+export async function resetPassword(email: string): Promise<void> {
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    throw normalizeAuthError(error);
+  }
 }
 
-export async function syncUserProfile(uid: string): Promise<{ role: string } | null> {
-  return getUserProfile(uid);
+export async function resendVerificationEmail(): Promise<void> {
+  try {
+    if (!auth.currentUser) {
+      throw new Error("로그인 상태가 아닙니다.");
+    }
+    await sendEmailVerification(auth.currentUser);
+  } catch (error) {
+    throw normalizeAuthError(error);
+  }
+}
+
+export async function fetchProfile(uid: string): Promise<UserProfile | null> {
+  return getProfile(uid);
 }

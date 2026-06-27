@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const bulletinSchema = z.object({
   id: z.string().min(1),
@@ -65,7 +66,11 @@ export const bulletinConverter = {
       updatedBy: bulletin.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<BulletinModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<BulletinModel, "id"> {
+    const data = snapshot.data(options);
     return {
       title: data.title as string,
       content: (data.content as string) ?? null,

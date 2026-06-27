@@ -47,7 +47,7 @@ export async function createTeam(data: {
   createdBy?: string;
 }): Promise<string> {
   const now = serverTimestamp();
-  const docRef = await addDoc(teamsRef, {
+  const docRef = await addDoc(collection(db, COLLECTIONS.TEAMS), {
     name: data.name,
     displayOrder: data.displayOrder ?? 0,
     leaderId: data.leaderId ?? null,

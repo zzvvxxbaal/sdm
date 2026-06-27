@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const teamSchema = z.object({
   id: z.string().min(1),
@@ -44,7 +45,11 @@ export const teamConverter = {
       updatedBy: team.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<TeamModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<TeamModel, "id"> {
+    const data = snapshot.data(options);
     return {
       name: data.name as string,
       displayOrder: (data.displayOrder as number) ?? 0,

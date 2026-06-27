@@ -1,0 +1,133 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- Helpers ----------
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    function userDoc(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data;
+    }
+
+    function myDoc() {
+      return userDoc(request.auth.uid);
+    }
+
+    function myRole() {
+      return isSignedIn() ? myDoc().role : 'guest';
+    }
+
+    function isApprovedActive() {
+      return isSignedIn()
+        && myDoc().approvalStatus == 'approved'
+        && myDoc().isActive == true;
+    }
+
+    // Privileged predicates require an approved AND active account, so a
+    // rejected or deactivated leader/admin loses all elevated access.
+    function isLeaderPlus() {
+      return isApprovedActive() && myRole() in ['leader', 'admin', 'super_admin'];
+    }
+
+    function isAdminPlus() {
+      return isApprovedActive() && myRole() in ['admin', 'super_admin'];
+    }
+
+    function isSuperAdmin() {
+      return isApprovedActive() && myRole() == 'super_admin';
+    }
+
+    // Fields a member may NEVER change on their own document.
+    function privilegedUnchanged() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return after.role == before.role
+        && after.approvalStatus == before.approvalStatus
+        && after.isActive == before.isActive
+        && after.teamId == before.teamId
+        && after.teamName == before.teamName
+        && after.cellId == before.cellId
+        && after.cellName == before.cellName
+        && after.ministry == before.ministry
+        && after.position == before.position
+        && after.approvedBy == before.approvedBy
+        && after.approvedAt == before.approvedAt
+        && after.rejectionReason == before.rejectionReason
+        && after.statistics == before.statistics
+        && after.createdAt == before.createdAt
+        && after.email == before.email;
+    }
+
+    // Role assignment guard (anti privilege-escalation): the role may stay the
+    // same; only super_admin may assign any role; admin may assign up to admin
+    // but never super_admin; leaders and members may never change role.
+    function validRoleChange() {
+      let after = request.resource.data.role;
+      return after == resource.data.role
+        || isSuperAdmin()
+        || (myRole() == 'admin' && after in ['user', 'member', 'leader', 'admin']);
+    }
+
+    // A new user may only create their own doc as an unprivileged, pending member.
+    function validSelfCreate() {
+      let d = request.resource.data;
+      return d.role == 'user'
+        && d.approvalStatus == 'pending'
+        && d.isActive == true
+        && d.approvedBy == null
+        && d.approvedAt == null;
+    }
+
+    // ---------- Users ----------
+    match /users/{uid} {
+      allow get: if isOwner(uid) || isLeaderPlus();
+      allow list: if isLeaderPlus();
+
+      allow create: if isOwner(uid) && validSelfCreate();
+
+      // Owner may edit their own profile but never privileged fields.
+      // Leaders/Admins may edit privileged fields on any member, but role
+      // changes are constrained by validRoleChange() to prevent escalation.
+      allow update: if (isOwner(uid) && privilegedUnchanged())
+        || (isLeaderPlus() && validRoleChange());
+
+      allow delete: if isAdminPlus();
+    }
+
+    // ---------- Organization structure (teams / cells) ----------
+    match /teams/{teamId} {
+      allow read: if isApprovedActive();
+      allow write: if isLeaderPlus();
+    }
+
+    match /cells/{cellId} {
+      allow read: if isApprovedActive();
+      allow write: if isLeaderPlus();
+    }
+
+    match /organization_settings/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isAdminPlus();
+    }
+
+    // ---------- Audit logs (admin only) ----------
+    match /audit_logs/{logId} {
+      allow read: if isAdminPlus();
+      allow create: if isLeaderPlus();
+      allow update, delete: if false;
+    }
+
+    // ---------- Default: approved members read; leaders write ----------
+    match /{collection}/{docId} {
+      allow read: if isApprovedActive();
+      allow write: if isLeaderPlus();
+    }
+  }
+}

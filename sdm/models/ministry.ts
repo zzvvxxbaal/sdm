@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const ministrySchema = z.object({
   id: z.string().min(1),
@@ -53,7 +54,11 @@ export const ministryConverter = {
       updatedBy: ministry.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<MinistryModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<MinistryModel, "id"> {
+    const data = snapshot.data(options);
     return {
       name: data.name as string,
       description: (data.description as string) ?? null,

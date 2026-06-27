@@ -1,0 +1,2 @@
+- [Firestore converters & writes](firestore-converters.md) — fromFirestore must take (snapshot, options); use plain (non-converter) refs for updateDoc/addDoc/partial-setDoc.
+- [sdm deps & first typecheck](sdm-env.md) — sdm is a standalone Next app outside the pnpm workspace; its node_modules needs manual `npm install` (multi-run due to 2-min cap) before tsc/lint work at all.

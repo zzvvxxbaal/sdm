@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const auditLogSchema = z.object({
   id: z.string().min(1),
@@ -45,7 +46,11 @@ export const auditLogConverter = {
       updatedBy: log.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<AuditLogModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<AuditLogModel, "id"> {
+    const data = snapshot.data(options);
     return {
       userId: data.userId as string,
       userEmail: (data.userEmail as string) ?? null,

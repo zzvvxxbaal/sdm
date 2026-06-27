@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const prayerRequestSchema = z.object({
   id: z.string().min(1),
@@ -47,7 +48,11 @@ export const prayerRequestConverter = {
       updatedBy: prayer.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<PrayerRequestModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<PrayerRequestModel, "id"> {
+    const data = snapshot.data(options);
     return {
       title: data.title as string,
       content: data.content as string,

@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
+import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
 
 export const cellSchema = z.object({
   id: z.string().min(1),
@@ -56,7 +57,11 @@ export const cellConverter = {
       updatedBy: cell.updatedBy,
     };
   },
-  fromFirestore(data: Record<string, unknown>): Omit<CellModel, "id"> {
+  fromFirestore(
+    snapshot: QueryDocumentSnapshot,
+    options?: SnapshotOptions,
+  ): Omit<CellModel, "id"> {
+    const data = snapshot.data(options);
     return {
       name: data.name as string,
       teamId: data.teamId as string,

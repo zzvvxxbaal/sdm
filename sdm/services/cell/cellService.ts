@@ -64,7 +64,7 @@ export async function createCell(data: {
   createdBy?: string;
 }): Promise<string> {
   const now = serverTimestamp();
-  const docRef = await addDoc(cellsRef, {
+  const docRef = await addDoc(collection(db, COLLECTIONS.CELLS), {
     name: data.name,
     teamId: data.teamId,
     displayOrder: data.displayOrder ?? 0,

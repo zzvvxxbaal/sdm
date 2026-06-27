@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/features/auth";
+import { useAuth, resolveAuthDestination } from "@/features/auth";
 import { loginSchema, type LoginFormData } from "@/lib/validation/auth";
 import { ROUTES } from "@/constants/routes";
 
@@ -39,8 +39,11 @@ export default function LoginPage() {
   const onSubmit = async (data: LoginFormData) => {
     clearError();
     try {
-      await signIn({ email: data.email, password: data.password });
-      router.push(ROUTES.DASHBOARD);
+      const profile = await signIn({
+        email: data.email,
+        password: data.password,
+      });
+      router.push(resolveAuthDestination(profile) ?? ROUTES.HOME);
     } catch {
       // Error handled by AuthProvider
     }

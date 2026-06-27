@@ -1,0 +1,225 @@
+You are the lead software engineer for the SDM project.
+
+Implement Sprint 1: Authentication & Member Management.
+
+This project must be production-ready.
+Do not generate mock code or placeholder implementations unless explicitly requested.
+Use enterprise-level architecture and clean code.
+
+====================================================
+AUTHENTICATION
+====================================================
+
+Implement authentication using Firebase Authentication.
+
+Supported login methods:
+
+- Google
+- Kakao
+- Email & Password
+
+Keep the authentication providers modular so new providers can be added later.
+
+Implement:
+
+- Login
+- Logout
+- Register
+- Forgot Password
+- Session Persistence
+- Route Protection
+
+====================================================
+REGISTRATION FLOW
+====================================================
+
+The registration flow MUST be:
+
+1. User registers
+2. User verifies email (Email login only)
+3. User completes profile
+4. Registration request is submitted
+5. Administrator reviews the request
+6. Administrator approves or rejects
+7. Only approved users can access protected features
+
+If approval is pending, display a dedicated page:
+
+"가입 승인 대기 중입니다.
+관리자의 승인을 기다려 주세요."
+
+====================================================
+MEMBER PROFILE
+====================================================
+
+Create a production-ready member profile.
+
+Personal Information
+
+- Name
+- Birth Year
+- Generation (Automatically generated)
+
+Examples
+
+1999 → 99또래
+2004 → 04또래
+2010 → 10또래
+
+- Gender
+- Phone Number
+- Email
+- Profile Photo
+
+Church Information
+
+- Registration Date
+- Team
+- Cell
+- Ministry
+- Position
+- New Family Status
+
+Permissions
+
+- Role
+- Approved
+- Active
+
+Statistics
+
+- Attendance Count
+- Attendance Rate
+- QT Count
+- Prayer Count
+- Last Login
+
+====================================================
+PROFILE EDITING
+====================================================
+
+Members may edit only:
+
+- Phone Number
+- Profile Photo
+- Introduction
+
+The following fields require Leader/Admin permission:
+
+- Team
+- Cell
+- Ministry
+- Position
+- Role
+
+====================================================
+ADMIN APPROVAL
+====================================================
+
+Create administrator pages for:
+
+Pending Members
+
+Approved Members
+
+Rejected Members
+
+Administrator actions:
+
+Approve
+
+Reject
+
+Assign Team
+
+Assign Cell
+
+Assign Ministry
+
+Assign Position
+
+Assign Role
+
+Deactivate Account
+
+Reactivate Account
+
+====================================================
+SECURITY
+====================================================
+
+Implement Firestore Security Rules.
+
+Role-based authorization.
+
+Prevent privilege escalation.
+
+Protect all private member data.
+
+====================================================
+DATA
+====================================================
+
+Use Firestore.
+
+Create repositories.
+
+Create converters.
+
+Use Zod validation.
+
+Use TypeScript Strict.
+
+====================================================
+UI
+====================================================
+
+Design style:
+
+Apple + Toss
+
+Primary Color:
+#2563EB
+
+Rounded cards
+
+Soft shadows
+
+Responsive
+
+Dark Mode
+
+Accessibility support
+
+Loading states
+
+Error handling
+
+Empty states
+
+====================================================
+PROJECT RULES
+
+Never hardcode data.
+
+Never duplicate code.
+
+Reusable components only.
+
+Feature-based architecture.
+
+SOLID principles.
+
+Production-ready quality.
+
+After implementation:
+
+Run lint
+
+Run type check
+
+Fix all errors
+
+Commit using a Conventional Commit message.
+
+Output a summary of all files created and modified.

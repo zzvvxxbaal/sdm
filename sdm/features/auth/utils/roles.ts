@@ -1,27 +1,48 @@
-import { UserRole } from "@/types/auth";
-import type { UserRoleValue } from "@/constants/auth";
+import {
+  UserRole,
+  ROLE_HIERARCHY,
+  hasRole as hasRoleBase,
+  hasAnyRole as hasAnyRoleBase,
+  isAdmin as isAdminBase,
+  isLeader as isLeaderBase,
+  isSuperAdmin as isSuperAdminBase,
+} from "@/types/role";
 
-const ROLE_HIERARCHY: Record<string, number> = {
-  [UserRole.USER]: 1,
-  [UserRole.MEMBER]: 2,
-  [UserRole.ADMIN]: 3,
-  [UserRole.SUPER_ADMIN]: 4,
-};
+function toRole(role: string): UserRole | null {
+  return (Object.values(UserRole) as string[]).includes(role)
+    ? (role as UserRole)
+    : null;
+}
 
 export function hasRole(userRole: string, requiredRole: string): boolean {
-  const userLevel = ROLE_HIERARCHY[userRole] ?? 0;
-  const requiredLevel = ROLE_HIERARCHY[requiredRole] ?? 0;
-  return userLevel >= requiredLevel;
+  const u = toRole(userRole);
+  const r = toRole(requiredRole);
+  if (!u || !r) return false;
+  return hasRoleBase(u, r);
 }
 
 export function hasAnyRole(userRole: string, requiredRoles: string[]): boolean {
-  return requiredRoles.some((role) => hasRole(userRole, role));
+  const u = toRole(userRole);
+  if (!u) return false;
+  const roles = requiredRoles
+    .map(toRole)
+    .filter((r): r is UserRole => r !== null);
+  return hasAnyRoleBase(u, roles);
 }
 
 export function isAdmin(role: string): boolean {
-  return hasRole(role, UserRole.ADMIN);
+  const u = toRole(role);
+  return u ? isAdminBase(u) : false;
+}
+
+export function isLeader(role: string): boolean {
+  const u = toRole(role);
+  return u ? isLeaderBase(u) : false;
 }
 
 export function isSuperAdmin(role: string): boolean {
-  return role === UserRole.SUPER_ADMIN;
+  const u = toRole(role);
+  return u ? isSuperAdminBase(u) : false;
 }
+
+export { ROLE_HIERARCHY };
