@@ -40,6 +40,7 @@ export interface BibleReference {
 
 export interface BibleSearchResult {
   verse: BibleVerse;
+  // Raw text rendered by the UI layer, which applies safe highlighting without HTML injection.
   displayText: string;
   matchScore: number;
 }
