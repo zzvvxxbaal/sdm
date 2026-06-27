@@ -26,6 +26,7 @@ export interface BibleVerse {
   verseNumber: number;
   text: string;
   testament: Testament;
+  searchText?: string;
 }
 
 export interface BibleReference {
@@ -39,8 +40,8 @@ export interface BibleReference {
 
 export interface BibleSearchResult {
   verse: BibleVerse;
-  highlights: string[];
-  score: number;
+  highlightedText: string;
+  matchScore: number;
 }
 
 export interface BibleReadingState {
