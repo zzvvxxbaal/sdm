@@ -10,8 +10,8 @@ export const userSchema = z.object({
   phoneNumber: z.string().nullable().optional(),
   role: z.nativeEnum(UserRole),
   generation: z.string().nullable().optional(),
-  ministry: z.string().nullable().optional(),
-  cellGroup: z.string().nullable().optional(),
+  teamId: z.string().nullable().optional(),
+  cellId: z.string().nullable().optional(),
   birthDate: z.string().nullable().optional(),
   gender: z.enum(["male", "female"]).nullable().optional(),
   address: z.string().nullable().optional(),
@@ -32,8 +32,8 @@ export interface UserModel extends FirestoreBase {
   phoneNumber: string | null;
   role: UserRole;
   generation: string | null;
-  ministry: string | null;
-  cellGroup: string | null;
+  teamId: string | null;
+  cellId: string | null;
   birthDate: string | null;
   gender: "male" | "female" | null;
   address: string | null;
@@ -50,8 +50,8 @@ export const userConverter = {
       phoneNumber: user.phoneNumber,
       role: user.role,
       generation: user.generation,
-      ministry: user.ministry,
-      cellGroup: user.cellGroup,
+      teamId: user.teamId,
+      cellId: user.cellId,
       birthDate: user.birthDate,
       gender: user.gender,
       address: user.address,
@@ -71,8 +71,8 @@ export const userConverter = {
       phoneNumber: (data.phoneNumber as string) ?? null,
       role: data.role as UserRole,
       generation: (data.generation as string) ?? null,
-      ministry: (data.ministry as string) ?? null,
-      cellGroup: (data.cellGroup as string) ?? null,
+      teamId: (data.teamId as string) ?? null,
+      cellId: (data.cellId as string) ?? null,
       birthDate: (data.birthDate as string) ?? null,
       gender: (data.gender as "male" | "female") ?? null,
       address: (data.address as string) ?? null,

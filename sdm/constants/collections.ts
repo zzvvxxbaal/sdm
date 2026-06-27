@@ -11,6 +11,9 @@ export const COLLECTIONS = {
   MINISTRIES: "ministries",
   CELL_GROUPS: "cell_groups",
   SERMONS: "sermons",
+  TEAMS: "teams",
+  CELLS: "cells",
+  ORGANIZATION_SETTINGS: "organization_settings",
 } as const;
 
 export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
@@ -28,4 +31,7 @@ export const COLLECTION_LABELS: Record<CollectionName, string> = {
   [COLLECTIONS.MINISTRIES]: "사역",
   [COLLECTIONS.CELL_GROUPS]: "셀 그룹",
   [COLLECTIONS.SERMONS]: "설교",
+  [COLLECTIONS.TEAMS]: "팀",
+  [COLLECTIONS.CELLS]: "순",
+  [COLLECTIONS.ORGANIZATION_SETTINGS]: "조직 설정",
 };

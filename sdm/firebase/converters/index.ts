@@ -10,6 +10,9 @@ import { auditLogConverter } from "@/models/audit_log";
 import { ministryConverter } from "@/models/ministry";
 import { cellGroupConverter } from "@/models/cell_group";
 import { sermonConverter } from "@/models/sermon";
+import { teamConverter } from "@/models/team";
+import { cellConverter } from "@/models/cell";
+import { organizationSettingsConverter } from "@/models/organization_settings";
 
 import { COLLECTIONS } from "@/constants/collections";
 
@@ -26,6 +29,9 @@ export const CONVERTERS = {
   [COLLECTIONS.MINISTRIES]: ministryConverter,
   [COLLECTIONS.CELL_GROUPS]: cellGroupConverter,
   [COLLECTIONS.SERMONS]: sermonConverter,
+  [COLLECTIONS.TEAMS]: teamConverter,
+  [COLLECTIONS.CELLS]: cellConverter,
+  [COLLECTIONS.ORGANIZATION_SETTINGS]: organizationSettingsConverter,
 } as const;
 
 export {
@@ -41,4 +47,7 @@ export {
   ministryConverter,
   cellGroupConverter,
   sermonConverter,
+  teamConverter,
+  cellConverter,
+  organizationSettingsConverter,
 };

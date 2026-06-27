@@ -10,3 +10,6 @@ export { auditLogSchema, auditLogConverter, type AuditLog, type AuditLogModel } 
 export { ministrySchema, ministryConverter, type Ministry, type MinistryModel } from "./ministry";
 export { cellGroupSchema, cellGroupConverter, type CellGroup, type CellGroupModel } from "./cell_group";
 export { sermonSchema, sermonConverter, type Sermon, type SermonModel } from "./sermon";
+export { teamSchema, teamConverter, type Team, type TeamModel } from "./team";
+export { cellSchema, cellConverter, type Cell, type CellModel } from "./cell";
+export { organizationSettingsSchema, organizationSettingsConverter, type OrganizationSettings, type OrganizationSettingsModel } from "./organization_settings";

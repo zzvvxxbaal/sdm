@@ -1,0 +1,156 @@
+You are the lead software architect for the SDM project.
+
+Redesign the church organization system to be fully dynamic and manageable through the admin dashboard.
+
+This is a production application. Never hardcode organizational data.
+
+## Firestore Collections
+
+Create and prepare the following collections:
+
+teams
+cells
+
+## Team Requirements
+
+A team represents a ministry team inside the youth ministry.
+
+Examples (for initial data only):
+- 1팀
+- 2팀
+- 3팀
+- 4팀
+- 새가족팀
+
+However, DO NOT hardcode these values.
+
+Administrators must be able to:
+
+- Create teams
+- Rename teams
+- Change display order
+- Activate / Deactivate teams
+- Delete teams
+- Change team leader
+- View members inside each team
+
+Prepare the data model for all of these features.
+
+----------------------------------------
+
+## Cell Requirements
+
+Cells (순) belong to one Team.
+
+Examples (initial organization only):
+
+1팀
+- 1순
+- 2순
+...
+- 10순
+
+2팀
+- 1순
+...
+- 9순
+
+3팀
+- 1순
+...
+- 8순
+
+These numbers are NOT fixed.
+
+Administrators must be able to:
+
+- Create cells
+- Rename cells
+- Move a cell to another team
+- Delete cells
+- Activate / Deactivate cells
+- Change display order
+- Assign leaders
+- Assign assistant leaders
+- Move members between cells
+
+No limits should exist in the code.
+
+----------------------------------------
+
+## User Model
+
+Users MUST store only
+
+teamId
+cellId
+
+Never store team names or cell names.
+
+Changing names must never require updating user documents.
+
+----------------------------------------
+
+## Firestore Models
+
+Create:
+
+Team interface
+Cell interface
+
+Create Firestore converters.
+
+Create Zod validation schemas.
+
+Create repository structure if needed.
+
+----------------------------------------
+
+## Admin Features (prepare architecture)
+
+Future admin dashboard will support:
+
+Organization Management
+
+- Team Management
+- Cell Management
+- Member Assignment
+- Leader Assignment
+- Drag & Drop ordering
+- Search
+- Filtering
+
+Prepare the backend architecture now.
+
+----------------------------------------
+
+## Localization
+
+The displayed name for "Cell" must be configurable.
+
+Example:
+
+순
+셀
+목장
+소그룹
+
+Changing this setting should automatically update the UI everywhere without code changes.
+
+----------------------------------------
+
+## Future Proof
+
+The architecture must support:
+
+Unlimited teams
+
+Unlimited cells
+
+Unlimited members
+
+Future ministry expansion
+
+No code modification should be required when organizational structures change.
+
+Everything must follow Clean Architecture and enterprise-level TypeScript standards.
