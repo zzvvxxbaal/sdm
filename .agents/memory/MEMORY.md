@@ -1,3 +1,1 @@
-- [Firestore converters & writes](firestore-converters.md) — fromFirestore must take (snapshot, options); use plain (non-converter) refs for updateDoc/addDoc/partial-setDoc.
-- [sdm deps & first typecheck](sdm-env.md) — sdm is a standalone Next app outside the pnpm workspace; its node_modules needs manual `npm install` (multi-run due to 2-min cap) before tsc/lint work at all.
-- [Firestore rules catch-all union](firestore-rules-union.md) — a permissive `match /{collection}` catch-all silently OR-overrides stricter per-collection rules; guard it with a hasExplicitRules() opt-out list.
+- [Firestore time/date field quirks](firestore-field-quirks.md) — createdAt/updatedAt are Timestamps at runtime despite z.any()/unknown typing; QTEntry omits the `date` field its queries use.
