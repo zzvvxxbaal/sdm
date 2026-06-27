@@ -128,11 +128,6 @@ export async function getVersesByReference(reference: BibleReference) {
   return verses.filter((verse) => verse.verseNumber >= reference.startVerse && verse.verseNumber <= endVerse);
 }
 
-function highlightText(text: string, keyword: string) {
-  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text.replace(new RegExp(`(${escaped})`, "gi"), "<mark>$1</mark>");
-}
-
 export async function searchBible(query: string, limit = 50): Promise<BibleSearchResult[]> {
   const keyword = query.trim();
   if (!keyword) return [];
@@ -158,7 +153,7 @@ export async function searchBible(query: string, limit = 50): Promise<BibleSearc
     .filter((verse) => normalize(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`).includes(normalize(keyword)))
     .map((verse) => ({
       verse,
-      highlightedText: highlightText(verse.text, keyword),
+      highlightedText: verse.text,
       matchScore: scoreVerse(verse, keyword),
     }));
 

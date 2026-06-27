@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Loader2 } from "lucide-react";
 import type { BibleSearchResult } from "@/types/bible";
@@ -13,6 +13,26 @@ interface BibleSearchProps {
   onSearch: (query: string) => void;
   onClear: () => void;
   onSelectVerse: (verseId: string) => void;
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function renderHighlightedText(text: string, keyword: string) {
+  const trimmedKeyword = keyword.trim();
+  if (!trimmedKeyword) return text;
+
+  const parts = text.split(new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi"));
+  const normalizedKeyword = trimmedKeyword.toLocaleLowerCase();
+
+  return parts.map((part, index) =>
+    part.toLocaleLowerCase() === normalizedKeyword ? (
+      <mark key={`${part}-${index}`}>{part}</mark>
+    ) : (
+      <Fragment key={`${part}-${index}`}>{part}</Fragment>
+    )
+  );
 }
 
 export function BibleSearch({
@@ -106,10 +126,9 @@ export function BibleSearch({
                         {result.verse.bookName} {result.verse.chapterNumber}:{result.verse.verseNumber}
                       </span>
                     </div>
-                    <p
-                      className="text-sm text-[#171717] dark:text-[#f5f5f5] leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: result.highlightedText }}
-                    />
+                    <p className="text-sm leading-relaxed text-[#171717] dark:text-[#f5f5f5]">
+                      {renderHighlightedText(result.highlightedText, query)}
+                    </p>
                   </button>
                 ))}
               </div>
