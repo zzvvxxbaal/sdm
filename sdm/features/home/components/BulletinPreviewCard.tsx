@@ -4,6 +4,7 @@ import { FileText, ExternalLink } from "lucide-react";
 import { SectionCard } from "./SectionCard";
 import { SectionError } from "./SectionError";
 import { EmptyState } from "@/components/ui";
+import { BibleReferenceLink } from "@/components/bible/BibleReferenceLink";
 import { formatKoreanDate } from "../lib/home-format";
 import type { BulletinModel } from "@/models/bulletin";
 
@@ -59,6 +60,11 @@ export function BulletinPreviewCard({
               {formatKoreanDate(bulletin.date)}
               {bulletin.sermonTitle ? ` · ${bulletin.sermonTitle}` : ""}
             </p>
+            {bulletin.scripture && (
+              <div className="mt-1 text-xs">
+                <BibleReferenceLink reference={bulletin.scripture} className="font-semibold" />
+              </div>
+            )}
           </div>
           {bulletin.fileURL && (
             <ExternalLink className="h-4 w-4 shrink-0 text-[#a3a3a3]" />

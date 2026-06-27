@@ -51,7 +51,7 @@ service cloud.firestore {
       return name in [
         'users', 'teams', 'cells', 'organization_settings',
         'announcements', 'events', 'bulletins', 'playlists',
-        'daily_content', 'audit_logs'
+        'daily_content', 'audit_logs', 'qt_entries', 'bible_favorites', 'bible_history'
       ];
     }
 
@@ -155,6 +155,24 @@ service cloud.firestore {
     match /daily_content/{docId} {
       allow read: if isApprovedActive();
       allow write: if isAdminPlus();
+    }
+
+    match /qt_entries/{docId} {
+      allow read: if isApprovedActive()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.visibility in ['cell', 'team', 'church', 'leaders', 'admin']);
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isApprovedActive() && resource.data.userId == request.auth.uid;
+    }
+
+    match /bible_favorites/{docId} {
+      allow read, write: if isApprovedActive() && resource.data.userId == request.auth.uid;
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /bible_history/{docId} {
+      allow read, write: if isApprovedActive() && resource.data.userId == request.auth.uid;
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
     }
 
     // ---------- Audit logs (admin only) ----------

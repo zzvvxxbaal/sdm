@@ -36,7 +36,7 @@ export function TodaysVerseForm({ initial, onSave }: VerseFormProps) {
       <CardHeader title="오늘의 말씀" description="홈 화면에 노출될 말씀을 설정합니다" />
       <form onSubmit={submit} className="space-y-3">
         <Field label="구절 위치" required error={errors.reference?.message}>
-          <Input {...register("reference")} placeholder="예: 요한복음 3:16" hasError={!!errors.reference} />
+          <Input {...register("reference")} placeholder="예: 요 3:16" hasError={!!errors.reference} />
         </Field>
         <Field label="말씀 본문" required error={errors.text?.message}>
           <Textarea {...register("text")} rows={3} placeholder="말씀 내용" hasError={!!errors.text} />
@@ -81,7 +81,7 @@ export function TodaysQtForm({ initial, onSave }: QtFormProps) {
       <CardHeader title="오늘의 QT" description="오늘의 묵상 본문을 설정합니다" />
       <form onSubmit={submit} className="space-y-3">
         <Field label="본문 위치" required error={errors.reference?.message}>
-          <Input {...register("reference")} placeholder="예: 시편 23편" hasError={!!errors.reference} />
+          <Input {...register("reference")} placeholder="예: 시 23:1" hasError={!!errors.reference} />
         </Field>
         <Field label="제목" required error={errors.title?.message}>
           <Input {...register("title")} placeholder="QT 제목" hasError={!!errors.title} />

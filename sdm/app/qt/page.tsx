@@ -25,7 +25,7 @@ const VISIBILITY_OPTIONS = [
 ] as const;
 
 export default function QtPage() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(normalizeDateKey(new Date()));
   const [search, setSearch] = useState("");
@@ -41,14 +41,20 @@ export default function QtPage() {
   const { entries, calendarDays, monthlySummary, weeklySummary, loading, reload } = useQTDashboard(user?.uid, currentMonth, filters);
 
   const allTags = useMemo(() => [...new Set(entries.flatMap((entry) => entry.tags))], [entries]);
-  const allBooks = useMemo(() => [...new Set(entries.map((entry) => entry.bibleReference))], [entries]);
+  const allBooks = useMemo(
+    () =>
+      Array.from(
+        new Map(entries.map((entry) => [entry.bibleReference.bookId, entry.bibleReference])).values(),
+      ),
+    [entries],
+  );
 
   const saveEntry = async (input: QTEntryInput) => {
-    if (!profile) return;
+    if (!user) return;
     setSubmitting(true);
     try {
-      if (editing) await updateQTEntry(editing.id, profile, input);
-      else await createQTEntry(profile, input);
+      if (editing) await updateQTEntry(editing.id, user, input);
+      else await createQTEntry(user, input);
       setEditing(null);
       await reload();
     } finally {
@@ -64,7 +70,7 @@ export default function QtPage() {
     await reload();
   };
 
-  if (!user || !profile) {
+  if (!user) {
     return <div className="px-4 py-10 text-center text-sm text-[#737373]">QT는 로그인 후 사용할 수 있습니다.</div>;
   }
 

@@ -25,7 +25,7 @@ export function useQTDashboard(userId: string | undefined, monthDate: Date, filt
   const year = monthDate.getFullYear();
   const month = monthDate.getMonth() + 1;
 
-  const reload = useCallback(async () => {
+  const fetchData = useCallback(async (showLoading: boolean) => {
     if (!userId) {
       setEntries([]);
       setCalendarDays([]);
@@ -34,7 +34,7 @@ export function useQTDashboard(userId: string | undefined, monthDate: Date, filt
       setLoading(false);
       return;
     }
-    setLoading(true);
+    if (showLoading) setLoading(true);
     try {
       const [monthEntries, days, monthSummary, weekSummary] = await Promise.all([
         getUserQTEntries(userId, { ...filters, monthKey }),
@@ -51,9 +51,16 @@ export function useQTDashboard(userId: string | undefined, monthDate: Date, filt
     }
   }, [filters, month, monthKey, userId, year]);
 
+  const reload = useCallback(async () => {
+    await fetchData(true);
+  }, [fetchData]);
+
   useEffect(() => {
-    void reload();
-  }, [reload]);
+    const timer = window.setTimeout(() => {
+      void fetchData(false);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [fetchData]);
 
   const selectedDateEntries = useMemo(() => {
     if (!filters.dateKey) return entries;

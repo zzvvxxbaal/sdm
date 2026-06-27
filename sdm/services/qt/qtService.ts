@@ -72,6 +72,14 @@ export async function getUserQTEntries(userId: string, filters: QTQueryFilters) 
   return filterEntries(entries, filters);
 }
 
+export async function getUserQTEntriesWithLimit(
+  userId: string,
+  options?: { limit?: number },
+) {
+  const monthKey = getMonthKey(new Date());
+  return queryMonthEntries(userId, monthKey, options?.limit);
+}
+
 export async function toggleQTFavorite(entryId: string, isFavorite: boolean) {
   await updateDoc(doc(db, QT_COLLECTION, entryId), { isFavorite: !isFavorite, updatedAt: serverTimestamp() });
 }

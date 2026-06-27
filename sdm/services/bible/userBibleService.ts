@@ -1,7 +1,19 @@
-import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  serverTimestamp,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { db } from "@/firebase/config";
 import { COLLECTIONS } from "@/constants/collections";
-import type { BibleReadingHistory, BibleVerse } from "@/types/bible";
+import type { BibleVerse } from "@/types/bible";
 
 const FAVORITES = COLLECTIONS.BIBLE_FAVORITES;
 const HISTORY = COLLECTIONS.BIBLE_HISTORY;
@@ -23,17 +35,15 @@ export async function toggleBibleFavorite(userId: string, verse: BibleVerse, isF
     await deleteDoc(ref);
     return;
   }
-  await updateDoc(ref, {}).catch(async () => {
-    await addDoc(collection(db, FAVORITES), {
-      userId,
-      verseId: verse.id,
-      bookId: verse.bookId,
-      bookName: verse.bookName,
-      chapterNumber: verse.chapterNumber,
-      verseNumber: verse.verseNumber,
-      text: verse.text,
-      createdAt: serverTimestamp(),
-    });
+  await setDoc(ref, {
+    userId,
+    verseId: verse.id,
+    bookId: verse.bookId,
+    bookName: verse.bookName,
+    chapterNumber: verse.chapterNumber,
+    verseNumber: verse.verseNumber,
+    text: verse.text,
+    createdAt: serverTimestamp(),
   });
 }
 
@@ -45,7 +55,7 @@ export async function recordBibleHistory(userId: string, verse: BibleVerse) {
     await updateDoc(snapshot.docs[0].ref, { viewedAt: serverTimestamp() });
     return;
   }
-  await addDoc(collection(db, HISTORY), {
+  await setDoc(doc(collection(db, HISTORY)), {
     userId,
     verseId: verse.id,
     bookId: verse.bookId,
@@ -53,7 +63,7 @@ export async function recordBibleHistory(userId: string, verse: BibleVerse) {
     chapterNumber: verse.chapterNumber,
     verseNumber: verse.verseNumber,
     viewedAt: serverTimestamp(),
-  } satisfies Omit<BibleReadingHistory, "id">);
+  });
 }
 
 export async function listBibleHistory(userId: string) {

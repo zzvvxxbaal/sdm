@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseReference } from "@/services/bible/bibleService";
 
 const optionalText = z.string().max(2000).optional().or(z.literal(""));
 const urlOrEmpty = z
@@ -32,7 +33,12 @@ export const bulletinFormSchema = z.object({
   date: z.string().min(1, "날짜를 선택해주세요"),
   fileURL: urlOrEmpty,
   preacher: z.string().max(100).optional().or(z.literal("")),
-  scripture: z.string().max(200).optional().or(z.literal("")),
+  scripture: z
+    .string()
+    .max(200)
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || parseReference(value) !== null, "예: 요 3:16 형식으로 입력해주세요"),
   sermonTitle: z.string().max(200).optional().or(z.literal("")),
 });
 

@@ -13,7 +13,6 @@ export function useBibleReader(initialBookId = "gen", initialChapter = 1) {
 
   useEffect(() => {
     let active = true;
-    setLoading(true);
     void getChapterVerses(bookId, chapterNumber).then((chapterVerses) => {
       if (!active) return;
       setVerses(chapterVerses);
@@ -27,6 +26,7 @@ export function useBibleReader(initialBookId = "gen", initialChapter = 1) {
   const book = useMemo(() => getBookById(bookId), [bookId]);
 
   const goToChapter = useCallback((nextBookId: string, nextChapter: number) => {
+    setLoading(true);
     setBookId(nextBookId);
     setChapterNumber(nextChapter);
   }, []);

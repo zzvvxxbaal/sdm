@@ -1,5 +1,8 @@
 export const COLLECTIONS = {
   USERS: "users",
+  QT_ENTRIES: "qt_entries",
+  BIBLE_FAVORITES: "bible_favorites",
+  BIBLE_HISTORY: "bible_history",
   ANNOUNCEMENTS: "announcements",
   EVENTS: "events",
   PRAYER_REQUESTS: "prayer_requests",
@@ -21,6 +24,9 @@ export type CollectionName = (typeof COLLECTIONS)[keyof typeof COLLECTIONS];
 
 export const COLLECTION_LABELS: Record<CollectionName, string> = {
   [COLLECTIONS.USERS]: "사용자",
+  [COLLECTIONS.QT_ENTRIES]: "QT",
+  [COLLECTIONS.BIBLE_FAVORITES]: "성경 즐겨찾기",
+  [COLLECTIONS.BIBLE_HISTORY]: "성경 최근 기록",
   [COLLECTIONS.ANNOUNCEMENTS]: "공지사항",
   [COLLECTIONS.EVENTS]: "일정",
   [COLLECTIONS.PRAYER_REQUESTS]: "기도제목",

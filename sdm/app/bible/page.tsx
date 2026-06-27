@@ -34,7 +34,6 @@ export default function BiblePage() {
     const rawQuery = searchParams.get("q");
     if (!rawQuery) return;
     setQuery(rawQuery);
-    setViewMode("search");
     void search(rawQuery);
   }, [search, searchParams, setQuery]);
 
