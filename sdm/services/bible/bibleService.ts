@@ -1,190 +1,186 @@
-import { db } from "@/firebase/config";
-import {
-  collection,
-  query,
-  where,
-  orderBy,
-  getDocs,
-  doc,
-  getDoc,
-  limit,
-} from "firebase/firestore";
-import type { BibleVerse, BibleReference } from "@/types/bible";
-import { getBookById, getBookByFileAbbreviation } from "@/models/bible_book";
+import type { BibleReference, BibleSearchResult, BibleVerse } from "@/types/bible";
+import { BIBLE_BOOKS, getBookById, searchBooks } from "@/models/bible_book";
 
-const BIBLE_VERSES_COLLECTION = "bible_verses";
-
-/**
- * Get verses for a specific chapter.
- */
-export async function getChapterVerses(
-  bookId: string,
-  chapterNumber: number
-): Promise<BibleVerse[]> {
-  const q = query(
-    collection(db, BIBLE_VERSES_COLLECTION),
-    where("bookId", "==", bookId),
-    where("chapterNumber", "==", chapterNumber),
-    orderBy("verseNumber", "asc")
-  );
-
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => d.data() as BibleVerse);
+interface BiblePayload {
+  verses: BibleVerse[];
 }
 
-/**
- * Get a single verse by ID.
- */
-export async function getVerseById(verseId: string): Promise<BibleVerse | null> {
-  const docRef = doc(db, BIBLE_VERSES_COLLECTION, verseId);
-  const snapshot = await getDoc(docRef);
-  return snapshot.exists() ? (snapshot.data() as BibleVerse) : null;
+interface BibleIndex {
+  verses: BibleVerse[];
+  byId: Map<string, BibleVerse>;
+  byChapter: Map<string, BibleVerse[]>;
+  ngramIndex: Map<string, string[]>;
 }
 
-/**
- * Get multiple verses by reference.
- */
-export async function getVersesByReference(
-  ref: BibleReference
-): Promise<BibleVerse[]> {
-  const q = query(
-    collection(db, BIBLE_VERSES_COLLECTION),
-    where("bookId", "==", ref.bookId),
-    where("chapterNumber", "==", ref.chapterNumber),
-    where("verseNumber", ">=", ref.startVerse),
-    where("verseNumber", "<=", ref.endVerse || ref.startVerse),
-    orderBy("verseNumber", "asc")
-  );
+let cache: Promise<BibleIndex> | null = null;
 
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map((d) => d.data() as BibleVerse);
+function normalize(value: string) {
+  return value.toLowerCase().replace(/[^0-9a-z\u3131-\u318e\uac00-\ud7a3]+/g, "");
 }
 
-/**
- * Search verses by keyword (client-side search for now).
- * For production, consider Algolia or Firestore full-text search extensions.
- */
-export async function searchVerses(
-  keyword: string,
-  options?: {
-    bookId?: string;
-    testament?: "old" | "new";
-    limit?: number;
+function chapterKey(bookId: string, chapterNumber: number) {
+  return `${bookId}:${chapterNumber}`;
+}
+
+function buildNgrams(value: string) {
+  const source = normalize(value);
+  if (!source) return [];
+  if (source.length === 1) return [source];
+  const grams = new Set<string>();
+  for (let size = 2; size <= Math.min(3, source.length); size += 1) {
+    for (let index = 0; index <= source.length - size; index += 1) {
+      grams.add(source.slice(index, index + size));
+    }
   }
-): Promise<BibleVerse[]> {
-  // For a 31K verse dataset, we can load all verses into memory
-  // or use a Firestore search extension. For now, we'll query by book
-  // if specified, otherwise load all verses.
-
-  const q = options?.bookId
-    ? query(
-        collection(db, BIBLE_VERSES_COLLECTION),
-        where("bookId", "==", options.bookId),
-        orderBy("verseNumber", "asc")
-      )
-    : query(
-        collection(db, BIBLE_VERSES_COLLECTION),
-        orderBy("verseNumber", "asc"),
-        limit(options?.limit || 100)
-      );
-
-  const snapshot = await getDocs(q);
-  const verses = snapshot.docs.map((d) => d.data() as BibleVerse);
-
-  const normalizedKeyword = keyword.toLowerCase().trim();
-  return verses.filter(
-    (v) =>
-      v.text.toLowerCase().includes(normalizedKeyword) ||
-      v.bookName.toLowerCase().includes(normalizedKeyword)
-  );
+  return [...grams];
 }
 
-/**
- * Get today's verse based on the date.
- * All users get the same verse each day.
- */
-export function getTodaysVerse(verses: BibleVerse[]): BibleVerse {
-  const today = new Date();
-  const dayOfYear = getDayOfYear(today);
-  const index = dayOfYear % verses.length;
-  return verses[index];
+async function loadBibleData() {
+  const response = await fetch("/data/bible_parsed.json");
+  const payload = (await response.json()) as BiblePayload;
+  return payload.verses;
 }
 
-function getDayOfYear(date: Date): number {
-  const start = new Date(date.getFullYear(), 0, 0);
-  const diff = date.getTime() - start.getTime();
-  const oneDay = 1000 * 60 * 60 * 24;
-  return Math.floor(diff / oneDay);
+async function getBibleIndex() {
+  if (!cache) {
+    cache = loadBibleData().then((verses) => {
+      const byId = new Map<string, BibleVerse>();
+      const byChapter = new Map<string, BibleVerse[]>();
+      const rawNgrams = new Map<string, Set<string>>();
+      verses.forEach((verse) => {
+        byId.set(verse.id, verse);
+        const key = chapterKey(verse.bookId, verse.chapterNumber);
+        byChapter.set(key, [...(byChapter.get(key) ?? []), verse]);
+        buildNgrams(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`).forEach(
+          (gram) => {
+            rawNgrams.set(gram, (rawNgrams.get(gram) ?? new Set<string>()).add(verse.id));
+          },
+        );
+      });
+      const ngramIndex = new Map<string, string[]>();
+      rawNgrams.forEach((ids, gram) => {
+        ngramIndex.set(gram, [...ids]);
+      });
+      return { verses, byId, byChapter, ngramIndex } satisfies BibleIndex;
+    });
+  }
+  return cache;
 }
 
-/**
- * Parse a Bible reference string.
- */
+function scoreVerse(verse: BibleVerse, query: string) {
+  const normalized = normalize(query);
+  const haystack = normalize(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`);
+  let score = haystack.includes(normalized) ? 10 : 0;
+  if (haystack.startsWith(normalized)) score += 5;
+  if (normalize(verse.bookName).includes(normalized)) score += 15;
+  return score;
+}
+
 export function parseReference(input: string): BibleReference | null {
   const trimmed = input.trim().replace(/\s+/g, " ");
-
-  // Pattern: "{bookAbbreviation}{chapter}:{verse}"
-  const tightPattern = /^([\uac00-\ud7a3]+)(\d+):(\d+)$/;
-  const spacedPattern = /^([\uac00-\ud7a3]+)\s+(\d+):(\d+)$/;
-  const rangePattern = /^([\uac00-\ud7a3]+)(\d+):(\d+)-(\d+)$/;
-  const crossChapterPattern = /^([\uac00-\ud7a3]+)(\d+):(\d+)-(\d+):(\d+)$/;
-
-  let match = trimmed.match(tightPattern);
-  if (!match) match = trimmed.match(spacedPattern);
-
-  if (match) {
-    const [, bookName, chapter, verse] = match;
-    const book = getBookByFileAbbreviation(bookName);
-    if (!book) return null;
-    return {
-      bookId: book.id,
-      bookName: book.name,
-      chapterNumber: parseInt(chapter, 10),
-      startVerse: parseInt(verse, 10),
-      endVerse: null,
-      rawText: input,
-    };
-  }
-
-  match = trimmed.match(rangePattern);
-  if (match) {
-    const [, bookName, chapter, startVerse, endVerse] = match;
-    const book = getBookByFileAbbreviation(bookName);
-    if (!book) return null;
-    return {
-      bookId: book.id,
-      bookName: book.name,
-      chapterNumber: parseInt(chapter, 10),
-      startVerse: parseInt(startVerse, 10),
-      endVerse: parseInt(endVerse, 10),
-      rawText: input,
-    };
-  }
-
-  match = trimmed.match(crossChapterPattern);
-  if (match) {
-    const [, bookName, startChapter, startVerse, endChapter, endVerse] = match;
-    const book = getBookByFileAbbreviation(bookName);
-    if (!book) return null;
-    return {
-      bookId: book.id,
-      bookName: book.name,
-      chapterNumber: parseInt(startChapter, 10),
-      startVerse: parseInt(startVerse, 10),
-      endVerse: parseInt(endVerse, 10),
-      rawText: input,
-    };
-  }
-
-  return null;
+  const match = trimmed.match(/^([0-9a-zA-Z\u3131-\u318e\uac00-\ud7a3]+)\s*(\d+)(?::(\d+)(?:-(\d+))?)?$/);
+  if (!match) return null;
+  const [, rawBook, rawChapter, rawStartVerse, rawEndVerse] = match;
+  const normalizedBook = rawBook.toLowerCase();
+  const book =
+    BIBLE_BOOKS.find((item) =>
+      [item.abbreviation, item.name, item.shortName, item.id, ...item.aliases]
+        .map((value) => value.toLowerCase())
+        .includes(normalizedBook),
+    ) ?? null;
+  if (!book) return null;
+  return {
+    bookId: book.id,
+    bookName: book.name,
+    chapterNumber: Number(rawChapter),
+    startVerse: Number(rawStartVerse ?? 1),
+    endVerse: rawEndVerse ? Number(rawEndVerse) : rawStartVerse ? null : null,
+    rawText: input,
+  };
 }
 
-/**
- * Generate a formatted reference string.
- */
-export function formatReference(ref: BibleReference): string {
-  if (ref.endVerse === null) {
-    return `${ref.bookName} ${ref.chapterNumber}:${ref.startVerse}`;
+export function formatReference(reference: BibleReference) {
+  if (reference.endVerse) {
+    return `${reference.bookName} ${reference.chapterNumber}:${reference.startVerse}-${reference.endVerse}`;
   }
-  return `${ref.bookName} ${ref.chapterNumber}:${ref.startVerse}-${ref.endVerse}`;
+  if (reference.startVerse > 1 || reference.rawText.includes(":")) {
+    return `${reference.bookName} ${reference.chapterNumber}:${reference.startVerse}`;
+  }
+  return `${reference.bookName} ${reference.chapterNumber}장`;
+}
+
+export async function getChapterVerses(bookId: string, chapterNumber: number) {
+  const index = await getBibleIndex();
+  return index.byChapter.get(chapterKey(bookId, chapterNumber)) ?? [];
+}
+
+export async function getVerseById(verseId: string) {
+  const index = await getBibleIndex();
+  return index.byId.get(verseId) ?? null;
+}
+
+export async function getVersesByReference(reference: BibleReference) {
+  const verses = await getChapterVerses(reference.bookId, reference.chapterNumber);
+  const endVerse = reference.endVerse ?? reference.startVerse;
+  return verses.filter((verse) => verse.verseNumber >= reference.startVerse && verse.verseNumber <= endVerse);
+}
+
+function highlightText(text: string, keyword: string) {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return text.replace(new RegExp(`(${escaped})`, "gi"), "<mark>$1</mark>");
+}
+
+export async function searchBible(query: string, limit = 50): Promise<BibleSearchResult[]> {
+  const keyword = query.trim();
+  if (!keyword) return [];
+  const reference = parseReference(keyword);
+  if (reference) {
+    return (await getVersesByReference(reference)).map((verse) => ({
+      verse,
+      highlightedText: verse.text,
+      matchScore: 100,
+    }));
+  }
+
+  const index = await getBibleIndex();
+  const grams = buildNgrams(keyword);
+  const candidateIds = grams.reduce<string[] | null>((acc, gram) => {
+    const ids = index.ngramIndex.get(gram) ?? [];
+    if (acc === null) return ids;
+    return acc.filter((id) => ids.includes(id));
+  }, null);
+  const verseMatches = (candidateIds ?? [])
+    .map((id) => index.byId.get(id))
+    .filter((verse): verse is BibleVerse => Boolean(verse))
+    .filter((verse) => normalize(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`).includes(normalize(keyword)))
+    .map((verse) => ({
+      verse,
+      highlightedText: highlightText(verse.text, keyword),
+      matchScore: scoreVerse(verse, keyword),
+    }));
+
+  const bookMatches = await Promise.all(
+    searchBooks(keyword).map(async (book) => {
+      const firstVerse = (await getChapterVerses(book.id, 1))[0];
+      return firstVerse
+        ? {
+            verse: firstVerse,
+            highlightedText: `${book.name} 1장으로 이동`,
+            matchScore: 80,
+          }
+        : null;
+    }),
+  );
+
+  return [...verseMatches, ...bookMatches.filter((item): item is BibleSearchResult => Boolean(item))]
+    .sort((left, right) => right.matchScore - left.matchScore)
+    .slice(0, limit);
+}
+
+export async function getResolvedReference(input: string) {
+  const reference = parseReference(input);
+  if (!reference) return null;
+  const book = getBookById(reference.bookId);
+  if (!book || reference.chapterNumber > book.chapterCount) return null;
+  return reference;
 }

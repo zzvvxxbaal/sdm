@@ -1,219 +1,96 @@
 "use client";
 
-import { useState } from "react";
-import { cn } from "@/lib/utils";
-import { Calendar, ChevronLeft, ChevronRight, BookOpen, Heart, Share2 } from "lucide-react";
-import { format } from "date-fns";
-import { ko } from "date-fns/locale";
+import { useMemo, useState } from "react";
+import { addMonths, subMonths } from "date-fns";
+import { Search } from "lucide-react";
+import { useAuth } from "@/features/auth";
+import { QTCalendar } from "@/features/qt/components/QTCalendar";
+import { QTEntryForm } from "@/features/qt/components/QTEntryForm";
+import { QTEntryList } from "@/features/qt/components/QTEntryList";
+import { QTSummaryCards } from "@/features/qt/components/QTSummaryCards";
+import { useQTDashboard } from "@/features/qt/hooks/useQTDashboard";
+import { deleteQTEntry, toggleQTArchive, toggleQTFavorite, createQTEntry, updateQTEntry } from "@/services/qt/qtService";
+import { getMonthKey, normalizeDateKey } from "@/features/qt/lib/qt-utils";
+import { Button, Field, Input, Select } from "@/components/ui";
+import type { QTEntry, QTEntryInput, QTQueryFilters } from "@/types/qt";
+
+const VISIBILITY_OPTIONS = [
+  { value: "all", label: "전체 공개 범위" },
+  { value: "private", label: "비공개" },
+  { value: "cell", label: "셀" },
+  { value: "team", label: "팀" },
+  { value: "church", label: "교회" },
+  { value: "leaders", label: "리더" },
+  { value: "admin", label: "관리자" },
+] as const;
 
 export default function QtPage() {
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const { user, profile } = useAuth();
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(normalizeDateKey(new Date()));
+  const [search, setSearch] = useState("");
+  const [tag, setTag] = useState("");
+  const [bookId, setBookId] = useState("");
+  const [visibility, setVisibility] = useState<QTQueryFilters["visibility"]>("all");
+  const [favoriteOnly, setFavoriteOnly] = useState(false);
+  const [archivedOnly, setArchivedOnly] = useState(false);
+  const [editing, setEditing] = useState<QTEntry | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const goToPreviousMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1));
+  const filters = useMemo(() => ({ monthKey: getMonthKey(currentMonth), dateKey: selectedDate, search, tag: tag || undefined, bookId: bookId || undefined, visibility, favoriteOnly, archivedOnly }), [archivedOnly, bookId, currentMonth, favoriteOnly, search, selectedDate, tag, visibility]);
+  const { entries, calendarDays, monthlySummary, weeklySummary, loading, reload } = useQTDashboard(user?.uid, currentMonth, filters);
+
+  const allTags = useMemo(() => [...new Set(entries.flatMap((entry) => entry.tags))], [entries]);
+  const allBooks = useMemo(() => [...new Set(entries.map((entry) => entry.bibleReference))], [entries]);
+
+  const saveEntry = async (input: QTEntryInput) => {
+    if (!profile) return;
+    setSubmitting(true);
+    try {
+      if (editing) await updateQTEntry(editing.id, profile, input);
+      else await createQTEntry(profile, input);
+      setEditing(null);
+      await reload();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const goToNextMonth = () => {
-    setCurrentMonth((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1));
+  const removeEntry = async (entry: QTEntry) => {
+    if (!user) return;
+    if (!window.confirm(`\"${entry.title}\" QT를 삭제할까요?`)) return;
+    await deleteQTEntry(entry.id, user.uid);
+    setEditing(null);
+    await reload();
   };
 
-  const year = currentMonth.getFullYear();
-  const month = currentMonth.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startDayOfWeek = firstDay.getDay();
-  const daysInMonth = lastDay.getDate();
-
-  const days: { day: number; date: Date; isToday: boolean; isSelected: boolean }[] = [];
-  for (let i = 0; i < startDayOfWeek; i++) {
-    days.push({ day: 0, date: new Date(), isToday: false, isSelected: false });
+  if (!user || !profile) {
+    return <div className="px-4 py-10 text-center text-sm text-[#737373]">QT는 로그인 후 사용할 수 있습니다.</div>;
   }
-  const today = new Date();
-  for (let i = 1; i <= daysInMonth; i++) {
-    const d = new Date(year, month, i);
-    days.push({
-      day: i,
-      date: d,
-      isToday: d.toDateString() === today.toDateString(),
-      isSelected: d.toDateString() === selectedDate.toDateString(),
-    });
-  }
-
-  const [title, setTitle] = useState("");
-  const [scripture, setScripture] = useState("");
-  const [observation, setObservation] = useState("");
-  const [application, setApplication] = useState("");
-  const [prayer, setPrayer] = useState("");
-
-  const isTodaySelected = selectedDate.toDateString() === today.toDateString();
 
   return (
-    <div className="flex flex-col min-h-[calc(100dvh-120px)]">
-      {/* Calendar Header */}
-      <div className="px-4 pt-4 pb-2">
-        <div className="flex items-center justify-between mb-3">
-          <button
-            onClick={goToPreviousMonth}
-            className="rounded-lg p-2 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <h2 className="text-base font-bold text-[#171717] dark:text-[#f5f5f5]">
-            {format(currentMonth, "yyyy년 M월", { locale: ko })}
-          </h2>
-          <button
-            onClick={goToNextMonth}
-            className="rounded-lg p-2 text-[#737373] hover:bg-[#f5f5f5] dark:hover:bg-[#262626]"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 gap-1 mb-1">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <div
-              key={d}
-              className="text-center text-[10px] font-semibold text-[#a3a3a3] py-1"
-            >
-              {d}
+    <div className="min-h-screen bg-[#f8fafc] px-4 py-6 dark:bg-[#0a0a0a]">
+      <div className="mx-auto max-w-6xl space-y-4">
+        <QTCalendar currentMonth={currentMonth} selectedDate={selectedDate} days={calendarDays} streakDays={monthlySummary?.streakDays ?? 0} onPreviousMonth={() => setCurrentMonth((value) => subMonths(value, 1))} onNextMonth={() => setCurrentMonth((value) => addMonths(value, 1))} onSelectDate={setSelectedDate} />
+        <QTSummaryCards monthly={monthlySummary} weekly={weeklySummary} />
+        <div className="grid gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <QTEntryForm selectedDate={selectedDate} editing={editing} onSubmit={saveEntry} onCancel={() => setEditing(null)} submitting={submitting} />
+          <div className="space-y-4">
+            <div className="rounded-2xl border border-[#e5e5e5] bg-white p-4 dark:border-[#2c2c2e] dark:bg-[#1c1c1e]">
+              <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <Field label="검색"><div className="relative"><Search className="pointer-events-none absolute left-3 top-3.5 h-4 w-4 text-[#a3a3a3]" /><Input className="pl-9" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="본문/제목 검색" /></div></Field>
+                <Field label="태그"><Select value={tag} onChange={(event) => setTag(event.target.value)}><option value="">전체 태그</option>{allTags.map((item) => <option key={item} value={item}>{item}</option>)}</Select></Field>
+                <Field label="성경 책"><Select value={bookId} onChange={(event) => setBookId(event.target.value)}><option value="">전체 책</option>{allBooks.map((item) => <option key={item.bookId} value={item.bookId}>{item.bookName}</option>)}</Select></Field>
+                <Field label="공개 범위"><Select value={visibility ?? "all"} onChange={(event) => setVisibility(event.target.value as QTQueryFilters["visibility"])}>{VISIBILITY_OPTIONS.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</Select></Field>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <Button type="button" size="sm" variant={favoriteOnly ? "primary" : "secondary"} onClick={() => setFavoriteOnly((value) => !value)}>즐겨찾기만</Button>
+                <Button type="button" size="sm" variant={archivedOnly ? "primary" : "secondary"} onClick={() => setArchivedOnly((value) => !value)}>보관함만</Button>
+                <Button type="button" size="sm" variant="ghost" onClick={() => { setSearch(""); setTag(""); setBookId(""); setVisibility("all"); setFavoriteOnly(false); setArchivedOnly(false); }}>필터 초기화</Button>
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* Days grid */}
-        <div className="grid grid-cols-7 gap-1">
-          {days.map((d, i) =>
-            d.day === 0 ? (
-              <div key={i} className="h-10" />
-            ) : (
-              <button
-                key={d.date.toISOString()}
-                onClick={() => setSelectedDate(d.date)}
-                className={cn(
-                  "h-10 rounded-xl flex items-center justify-center text-sm font-medium transition-all",
-                  d.isSelected
-                    ? "bg-[#2563EB] text-white shadow-sm"
-                    : d.isToday
-                    ? "bg-[#eff6ff] text-[#2563EB] font-bold"
-                    : "text-[#171717] hover:bg-[#f5f5f5] dark:text-[#f5f5f5] dark:hover:bg-[#262626]"
-                )}
-              >
-                {d.day}
-              </button>
-            )
-          )}
-        </div>
-      </div>
-
-      {/* QT Form */}
-      <div className="flex-1 px-4 py-4 space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <Calendar className="h-4 w-4 text-[#2563EB]" />
-          <span className="text-sm font-semibold text-[#171717] dark:text-[#f5f5f5]">
-            {isTodaySelected ? "오늘의 QT" : format(selectedDate, "M월 d일", { locale: ko }) + " QT"}
-          </span>
-        </div>
-
-        {/* Title */}
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="제목 (예: 사랑의 힘)"
-          className={cn(
-            "w-full rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 text-sm",
-            "placeholder:text-[#a3a3a3] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10",
-            "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5]"
-          )}
-        />
-
-        {/* Scripture Reference */}
-        <div className="relative">
-          <BookOpen className="absolute left-3 top-3 h-4 w-4 text-[#a3a3a3]" />
-          <input
-            value={scripture}
-            onChange={(e) => setScripture(e.target.value)}
-            placeholder="매일 약 본 범위 (예: 창세기 1:1-3)"
-            className={cn(
-              "w-full rounded-xl border border-[#e5e5e5] bg-white pl-10 pr-4 py-3 text-sm",
-              "placeholder:text-[#a3a3a3] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5]"
-            )}
-          />
-        </div>
-
-        {/* Observation */}
-        <div>
-          <label className="text-xs font-semibold text-[#737373] mb-1.5 block">관찰 (Observation)</label>
-          <textarea
-            value={observation}
-            onChange={(e) => setObservation(e.target.value)}
-            placeholder="성경 범위에서 뭐라고 말하고 있나요?"
-            rows={4}
-            className={cn(
-              "w-full rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 text-sm resize-none",
-              "placeholder:text-[#a3a3a3] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5]"
-            )}
-          />
-        </div>
-
-        {/* Application */}
-        <div>
-          <label className="text-xs font-semibold text-[#737373] mb-1.5 block">적용 (Application)</label>
-          <textarea
-            value={application}
-            onChange={(e) => setApplication(e.target.value)}
-            placeholder="오늘 나의 산업과 가정, 인권 관계 등에 어떻게 적용할 수 있나요?"
-            rows={4}
-            className={cn(
-              "w-full rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 text-sm resize-none",
-              "placeholder:text-[#a3a3a3] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5]"
-            )}
-          />
-        </div>
-
-        {/* Prayer */}
-        <div>
-          <label className="text-xs font-semibold text-[#737373] mb-1.5 block">기도 (Prayer)</label>
-          <textarea
-            value={prayer}
-            onChange={(e) => setPrayer(e.target.value)}
-            placeholder="주님께서 내 산업에 대해 지시해주시고, 아미 같은 이 하루를 산것으로 나아게 돼주소서."
-            rows={4}
-            className={cn(
-              "w-full rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 text-sm resize-none",
-              "placeholder:text-[#a3a3a3] outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/10",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#f5f5f5]"
-            )}
-          />
-        </div>
-
-        {/* Actions */}
-        <div className="flex gap-3 pt-2 pb-8">
-          <button
-            className={cn(
-              "flex-1 h-12 rounded-xl bg-[#2563EB] text-white text-sm font-semibold",
-              "hover:bg-[#1d4ed8] transition-colors active:scale-[0.98]"
-            )}
-          >
-            <span className="flex items-center justify-center gap-2">
-              <Heart className="h-4 w-4" />
-              QT 저장하기
-            </span>
-          </button>
-          <button
-            className={cn(
-              "h-12 w-12 rounded-xl border border-[#e5e5e5] bg-white",
-              "flex items-center justify-center text-[#525252]",
-              "hover:bg-[#f5f5f5] transition-colors",
-              "dark:bg-[#1c1c1e] dark:border-[#2c2c2e] dark:text-[#a3a3a3] dark:hover:bg-[#262626]"
-            )}
-          >
-            <Share2 className="h-4 w-4" />
-          </button>
+            {loading ? <div className="rounded-2xl bg-white p-10 text-center text-sm text-[#737373] dark:bg-[#1c1c1e]">QT를 불러오는 중입니다...</div> : <QTEntryList entries={entries} onEdit={setEditing} onDelete={removeEntry} onToggleFavorite={async (entry) => { await toggleQTFavorite(entry.id, entry.isFavorite); await reload(); }} onToggleArchive={async (entry) => { await toggleQTArchive(entry.id, entry.isArchived); await reload(); }} />}
+          </div>
         </div>
       </div>
     </div>
