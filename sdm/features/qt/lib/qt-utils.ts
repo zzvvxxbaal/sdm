@@ -1,5 +1,6 @@
 import { addDays, endOfWeek, format, startOfWeek } from "date-fns";
 import type { QTCalendarDay, QTEntry, QTMonthlySummary, QTQueryFilters, QTWeeklySummary } from "@/types/qt";
+import { splitSearchTokens } from "@/lib/text/searchTokens";
 
 interface SearchTokenSource {
   title: string;
@@ -47,8 +48,8 @@ export function buildSearchTokens(entry: SearchTokenSource) {
     .join(" ")
     .toLowerCase();
   const tokens = source
-    .split(/[^0-9a-z\u3131-\u318e\uac00-\ud7a3]+/)
-    .filter(Boolean);
+    .split(" ")
+    .flatMap((value) => splitSearchTokens(value));
   return [...new Set(tokens)];
 }
 

@@ -13,11 +13,18 @@ export function useBibleReader(initialBookId = "gen", initialChapter = 1) {
 
   useEffect(() => {
     let active = true;
-    void getChapterVerses(bookId, chapterNumber).then((chapterVerses) => {
-      if (!active) return;
-      setVerses(chapterVerses);
-      setLoading(false);
-    });
+    void getChapterVerses(bookId, chapterNumber)
+      .then((chapterVerses) => {
+        if (!active) return;
+        setVerses(chapterVerses);
+      })
+      .catch(() => {
+        if (!active) return;
+        setVerses([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
     return () => {
       active = false;
     };

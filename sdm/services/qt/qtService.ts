@@ -49,7 +49,7 @@ export async function createQTEntry(profile: UserProfile, input: QTEntryInput) {
     "statistics.qtCount": increment(1),
     updatedAt: new Date().toISOString(),
   }).catch((error: unknown) => {
-    console.error("QT 통계 업데이트에 실패했습니다.", error);
+    console.error(`QT 통계 업데이트에 실패했습니다. userId=${profile.uid}`, error);
   });
   return docRef.id;
 }
@@ -67,7 +67,7 @@ export async function deleteQTEntry(entryId: string, userId: string) {
     "statistics.qtCount": increment(-1),
     updatedAt: new Date().toISOString(),
   }).catch((error: unknown) => {
-    console.error("QT 통계 롤백에 실패했습니다.", error);
+    console.error(`QT 통계 롤백에 실패했습니다. entryId=${entryId} userId=${userId}`, error);
   });
 }
 

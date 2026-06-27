@@ -39,7 +39,19 @@ export default function QtPage() {
   const [deleteTarget, setDeleteTarget] = useState<QTEntry | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
-  const filters = useMemo(() => ({ monthKey: getMonthKey(currentMonth), dateKey: selectedDate, search, tag: tag || undefined, bookId: bookId || undefined, visibility, favoriteOnly, archivedOnly }), [archivedOnly, bookId, currentMonth, favoriteOnly, search, selectedDate, tag, visibility]);
+  const filters = useMemo(
+    () => ({
+      monthKey: getMonthKey(currentMonth),
+      dateKey: selectedDate,
+      search,
+      tag: tag || undefined,
+      bookId: bookId || undefined,
+      visibility,
+      favoriteOnly,
+      archivedOnly,
+    }),
+    [archivedOnly, bookId, currentMonth, favoriteOnly, search, selectedDate, tag, visibility],
+  );
   const { entries, calendarDays, monthlySummary, weeklySummary, loading, reload } = useQTDashboard(user?.uid, currentMonth, filters);
 
   const allTags = useMemo(() => [...new Set(entries.flatMap((entry) => entry.tags))], [entries]);

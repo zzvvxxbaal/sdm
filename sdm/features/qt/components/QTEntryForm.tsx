@@ -6,6 +6,8 @@ import { Field, Input, Select, Textarea, Button, Card } from "@/components/ui";
 import type { QTEntry, QTEntryInput, QTVisibility } from "@/types/qt";
 import { parseReference } from "@/services/bible/bibleService";
 
+const REFERENCE_ERROR_MESSAGE = "예: 요 3:16 형식으로 입력해주세요";
+
 interface FormValues {
   entryDate: string;
   reference: string;
@@ -58,7 +60,7 @@ export function QTEntryForm({ selectedDate, editing, onSubmit, onCancel, submitt
   const submit = handleSubmit(async (values) => {
     const reference = parseReference(values.reference);
     if (!reference) {
-      setError("reference", { message: "올바른 성경 참조를 입력해주세요. 예: 요 3:16" });
+      setError("reference", { message: REFERENCE_ERROR_MESSAGE });
       return;
     }
     await onSubmit({

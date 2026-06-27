@@ -1,5 +1,6 @@
 import type { BibleReference, BibleSearchResult, BibleVerse } from "@/types/bible";
 import { BIBLE_BOOKS, getBookById, searchBooks } from "@/models/bible_book";
+import { normalizeSearchText } from "@/lib/text/searchTokens";
 
 interface BiblePayload {
   verses: BibleVerse[];
@@ -15,7 +16,7 @@ interface BibleIndex {
 let cache: Promise<BibleIndex> | null = null;
 
 function normalize(value: string) {
-  return value.toLowerCase().replace(/[^0-9a-z\u3131-\u318e\uac00-\ud7a3]+/g, "");
+  return normalizeSearchText(value);
 }
 
 function chapterKey(bookId: string, chapterNumber: number) {

@@ -12,7 +12,8 @@ export const SUPPORTED_ENCODINGS = [
 
 export type BibleEncoding = (typeof SUPPORTED_ENCODINGS)[number];
 
-function decodeBuffer(buffer: Buffer, encoding: BibleEncoding): string {
+function decodeBuffer(source: Uint8Array, encoding: BibleEncoding): string {
+  const buffer = Buffer.from(source);
   if (encoding === "utf-8-bom") {
     return buffer.toString("utf-8", 3);
   }
@@ -20,7 +21,8 @@ function decodeBuffer(buffer: Buffer, encoding: BibleEncoding): string {
     return buffer.toString("utf-8");
   }
   const decoderEncoding = encoding === "cp949" ? "euc-kr" : encoding;
-  return new TextDecoder(decoderEncoding).decode(buffer);
+  const Decoder = TextDecoder as unknown as { new (label?: string): TextDecoder };
+  return new Decoder(decoderEncoding).decode(buffer);
 }
 
 /**
@@ -30,7 +32,7 @@ function decodeBuffer(buffer: Buffer, encoding: BibleEncoding): string {
  * @param buffer - Raw file buffer
  * @returns Object with encoding name and decoded text
  */
-export function detectBibleEncoding(buffer: Buffer): {
+export function detectBibleEncoding(buffer: Uint8Array): {
   encoding: BibleEncoding;
   text: string;
 } {
@@ -44,7 +46,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 
   // Try UTF-8
   if (isValidUTF8(buffer)) {
-    const text = buffer.toString("utf-8");
+    const text = decodeBuffer(buffer, "utf-8");
     if (looksLikeKoreanBible(text)) {
       return { encoding: "utf-8", text };
     }
@@ -78,7 +80,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 /**
  * Validates if a buffer is valid UTF-8 without decoding.
  */
-function isValidUTF8(buffer: Buffer): boolean {
+function isValidUTF8(buffer: Uint8Array): boolean {
   try {
     const decoder = new TextDecoder("utf-8", { fatal: true });
     decoder.decode(buffer);
@@ -114,7 +116,7 @@ function looksLikeKoreanBible(text: string): boolean {
 /**
  * Converts Bible text to UTF-8 for consistent processing.
  */
-export function convertToUTF8(buffer: Buffer): string {
+export function convertToUTF8(buffer: Uint8Array): string {
   const { text } = detectBibleEncoding(buffer);
   return text;
 }

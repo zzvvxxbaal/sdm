@@ -60,6 +60,13 @@ export default function BiblePage() {
 
   const historyItems = useMemo(() => history.slice(0, 5), [history]);
 
+  const moveToVerseId = (verseId: string) => {
+    const [nextBookId, nextChapter] = verseId.split("_");
+    const parsedChapter = Number(nextChapter);
+    if (!nextBookId || Number.isNaN(parsedChapter)) return;
+    goToChapter(nextBookId, parsedChapter);
+  };
+
   return (
     <div className="min-h-screen bg-[#f8fafc] px-4 py-4 dark:bg-[#0a0a0a]">
       <div className="mx-auto flex max-w-6xl flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px]">
@@ -81,8 +88,7 @@ export default function BiblePage() {
           ) : (
             <div className="p-4">
               <BibleSearch query={query} onQueryChange={setQuery} results={results} loading={searchLoading} onSearch={search} onClear={clear} onSelectVerse={(verseId) => {
-                const [nextBookId, nextChapter] = verseId.split("_");
-                goToChapter(nextBookId, Number(nextChapter));
+                moveToVerseId(verseId);
                 setViewMode("reader");
               }} />
               <div className="mt-4 space-y-3">
@@ -95,14 +101,14 @@ export default function BiblePage() {
         <aside className="space-y-4">
           <Panel title="최근 본 본문" icon={<History className="h-4 w-4" />}>
             {historyItems.length ? historyItems.map((item) => (
-              <button key={item.id} onClick={() => goToChapter(item.verseId.split("_")[0], item.chapterNumber)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
+              <button key={item.id} onClick={() => moveToVerseId(item.verseId)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
                 <p className="font-semibold text-[#171717] dark:text-[#f5f5f5]">{item.bookName} {item.chapterNumber}:{item.verseNumber}</p>
               </button>
             )) : <Empty label="최근 기록이 없습니다" />}
           </Panel>
           <Panel title="즐겨찾기" icon={<BookOpen className="h-4 w-4" />}>
             {favorites.length ? favorites.slice(0, 5).map((item) => (
-              <button key={item.id} onClick={() => goToChapter(item.verseId.split("_")[0], item.chapterNumber)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
+              <button key={item.id} onClick={() => moveToVerseId(item.verseId)} className="w-full rounded-xl border border-[#e5e5e5] p-3 text-left text-sm hover:bg-[#fafafa] dark:border-[#2c2c2e] dark:hover:bg-[#1c1c1e]">
                 <p className="font-semibold text-[#171717] dark:text-[#f5f5f5]">{item.bookName} {item.chapterNumber}:{item.verseNumber}</p>
                 <p className="mt-1 line-clamp-2 text-xs text-[#737373] dark:text-[#a3a3a3]">{item.text}</p>
               </button>
