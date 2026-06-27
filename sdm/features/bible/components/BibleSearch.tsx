@@ -28,9 +28,9 @@ function renderHighlightedText(text: string, keyword: string) {
 
   return parts.map((part, index) =>
     part.toLocaleLowerCase() === normalizedKeyword ? (
-      <mark key={`${part}-${index}`}>{part}</mark>
+      <mark key={index}>{part}</mark>
     ) : (
-      <Fragment key={`${part}-${index}`}>{part}</Fragment>
+      <Fragment key={index}>{part}</Fragment>
     )
   );
 }
