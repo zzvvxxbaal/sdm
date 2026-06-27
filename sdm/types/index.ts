@@ -8,3 +8,11 @@ export type {
   SignUpCredentials,
   AuthContextValue,
 } from "./user";
+
+export type {
+  FirestoreBase,
+  FiresoftDelete,
+  FirestoreTimestamp,
+  FirestoreQueryOptions,
+  FirestoreFilter,
+} from "./firestore";
