@@ -53,7 +53,9 @@ async function getBibleIndex() {
         byChapter.set(key, [...(byChapter.get(key) ?? []), verse]);
         buildNgrams(`${verse.bookName}${verse.chapterNumber}${verse.verseNumber}${verse.text}`).forEach(
           (gram) => {
-            rawNgrams.set(gram, (rawNgrams.get(gram) ?? new Set<string>()).add(verse.id));
+            const ids = rawNgrams.get(gram) ?? new Set<string>();
+            ids.add(verse.id);
+            rawNgrams.set(gram, ids);
           },
         );
       });

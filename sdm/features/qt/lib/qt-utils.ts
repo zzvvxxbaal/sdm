@@ -1,6 +1,15 @@
 import { addDays, endOfWeek, format, startOfWeek } from "date-fns";
 import type { QTCalendarDay, QTEntry, QTMonthlySummary, QTQueryFilters, QTWeeklySummary } from "@/types/qt";
 
+interface SearchTokenSource {
+  title: string;
+  meditation: string;
+  prayer: string;
+  application: string;
+  tags: string[];
+  bibleReference: QTEntry["bibleReference"];
+}
+
 export function normalizeDateKey(value: Date | string) {
   const date = typeof value === "string" ? new Date(value) : value;
   return format(date, "yyyy-MM-dd");
@@ -21,7 +30,7 @@ export function toDate(value: unknown) {
   return null;
 }
 
-export function buildSearchTokens(entry: Pick<QTEntry, "title" | "meditation" | "prayer" | "application" | "tags" | "bibleReference"> | Omit<QTEntry, "id" | "userId" | "userName" | "teamId" | "cellId" | "dateKey" | "monthKey" | "searchTokens" | "createdAt" | "updatedAt">) {
+export function buildSearchTokens(entry: SearchTokenSource) {
   const source = [
     entry.title,
     entry.meditation,

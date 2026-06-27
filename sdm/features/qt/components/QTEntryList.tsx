@@ -4,7 +4,21 @@ import { BibleReferenceLink } from "@/components/bible/BibleReferenceLink";
 import { QTVisibilityBadge } from "@/components/qt/QTVisibilityBadge";
 import type { QTEntry } from "@/types/qt";
 
-export function QTEntryList({ entries, onEdit, onDelete, onToggleFavorite, onToggleArchive }: { entries: QTEntry[]; onEdit: (entry: QTEntry) => void; onDelete: (entry: QTEntry) => void; onToggleFavorite: (entry: QTEntry) => void; onToggleArchive: (entry: QTEntry) => void }) {
+interface QTEntryListProps {
+  entries: QTEntry[];
+  onEdit: (entry: QTEntry) => void;
+  onDelete: (entry: QTEntry) => void;
+  onToggleFavorite: (entry: QTEntry) => void;
+  onToggleArchive: (entry: QTEntry) => void;
+}
+
+export function QTEntryList({
+  entries,
+  onEdit,
+  onDelete,
+  onToggleFavorite,
+  onToggleArchive,
+}: QTEntryListProps) {
   if (entries.length === 0) {
     return <EmptyState icon={Archive} title="선택한 조건의 QT가 없습니다" description="날짜를 바꾸거나 새 QT를 작성해보세요." />;
   }

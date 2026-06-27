@@ -1,6 +1,13 @@
 import type { BibleReference } from "@/types/bible";
 
 export type QTVisibility = "private" | "cell" | "team" | "church" | "leaders" | "admin";
+export type FirestoreDateValue =
+  | string
+  | Date
+  | {
+      toDate?: () => Date;
+      seconds?: number;
+    };
 
 export interface QTEntry {
   id: string;
@@ -22,8 +29,8 @@ export interface QTEntry {
   visibility: QTVisibility;
   isFavorite: boolean;
   isArchived: boolean;
-  createdAt: unknown;
-  updatedAt: unknown;
+  createdAt: FirestoreDateValue;
+  updatedAt: FirestoreDateValue;
 }
 
 export interface QTEntryInput {

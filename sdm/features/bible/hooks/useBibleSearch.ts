@@ -17,6 +17,8 @@ export function useBibleSearch() {
     setLoading(true);
     try {
       setResults(await searchBible(keyword));
+    } catch {
+      setResults([]);
     } finally {
       setLoading(false);
     }

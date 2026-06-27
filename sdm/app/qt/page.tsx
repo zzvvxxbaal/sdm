@@ -12,6 +12,7 @@ import { useQTDashboard } from "@/features/qt/hooks/useQTDashboard";
 import { deleteQTEntry, toggleQTArchive, toggleQTFavorite, createQTEntry, updateQTEntry } from "@/services/qt/qtService";
 import { getMonthKey, normalizeDateKey } from "@/features/qt/lib/qt-utils";
 import { Button, Field, Input, Select } from "@/components/ui";
+import { ConfirmDialog } from "@/features/admin/components/ConfirmDialog";
 import type { QTEntry, QTEntryInput, QTQueryFilters } from "@/types/qt";
 
 const VISIBILITY_OPTIONS = [
@@ -35,6 +36,7 @@ export default function QtPage() {
   const [favoriteOnly, setFavoriteOnly] = useState(false);
   const [archivedOnly, setArchivedOnly] = useState(false);
   const [editing, setEditing] = useState<QTEntry | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<QTEntry | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const filters = useMemo(() => ({ monthKey: getMonthKey(currentMonth), dateKey: selectedDate, search, tag: tag || undefined, bookId: bookId || undefined, visibility, favoriteOnly, archivedOnly }), [archivedOnly, bookId, currentMonth, favoriteOnly, search, selectedDate, tag, visibility]);
@@ -64,7 +66,6 @@ export default function QtPage() {
 
   const removeEntry = async (entry: QTEntry) => {
     if (!user) return;
-    if (!window.confirm(`\"${entry.title}\" QT를 삭제할까요?`)) return;
     await deleteQTEntry(entry.id, user.uid);
     setEditing(null);
     await reload();
@@ -95,10 +96,19 @@ export default function QtPage() {
                 <Button type="button" size="sm" variant="ghost" onClick={() => { setSearch(""); setTag(""); setBookId(""); setVisibility("all"); setFavoriteOnly(false); setArchivedOnly(false); }}>필터 초기화</Button>
               </div>
             </div>
-            {loading ? <div className="rounded-2xl bg-white p-10 text-center text-sm text-[#737373] dark:bg-[#1c1c1e]">QT를 불러오는 중입니다...</div> : <QTEntryList entries={entries} onEdit={setEditing} onDelete={removeEntry} onToggleFavorite={async (entry) => { await toggleQTFavorite(entry.id, entry.isFavorite); await reload(); }} onToggleArchive={async (entry) => { await toggleQTArchive(entry.id, entry.isArchived); await reload(); }} />}
+            {loading ? <div className="rounded-2xl bg-white p-10 text-center text-sm text-[#737373] dark:bg-[#1c1c1e]">QT를 불러오는 중입니다...</div> : <QTEntryList entries={entries} onEdit={setEditing} onDelete={setDeleteTarget} onToggleFavorite={async (entry) => { await toggleQTFavorite(entry.id, entry.isFavorite); await reload(); }} onToggleArchive={async (entry) => { await toggleQTArchive(entry.id, entry.isArchived); await reload(); }} />}
           </div>
         </div>
       </div>
+      {deleteTarget && (
+        <ConfirmDialog
+          isOpen
+          title="QT 삭제"
+          description={`"${deleteTarget.title}" QT를 삭제할까요?`}
+          onConfirm={() => removeEntry(deleteTarget)}
+          onClose={() => setDeleteTarget(null)}
+        />
+      )}
     </div>
   );
 }

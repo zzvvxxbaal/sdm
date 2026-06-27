@@ -45,7 +45,12 @@ export async function createQTEntry(profile: UserProfile, input: QTEntryInput) {
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
-  await updateDoc(userDoc(profile.uid), { "statistics.qtCount": increment(1), updatedAt: new Date().toISOString() }).catch(() => undefined);
+  await updateDoc(userDoc(profile.uid), {
+    "statistics.qtCount": increment(1),
+    updatedAt: new Date().toISOString(),
+  }).catch((error: unknown) => {
+    console.error("QT 통계 업데이트에 실패했습니다.", error);
+  });
   return docRef.id;
 }
 
@@ -58,7 +63,12 @@ export async function updateQTEntry(entryId: string, profile: UserProfile, input
 
 export async function deleteQTEntry(entryId: string, userId: string) {
   await deleteDoc(doc(db, QT_COLLECTION, entryId));
-  await updateDoc(userDoc(userId), { "statistics.qtCount": increment(-1), updatedAt: new Date().toISOString() }).catch(() => undefined);
+  await updateDoc(userDoc(userId), {
+    "statistics.qtCount": increment(-1),
+    updatedAt: new Date().toISOString(),
+  }).catch((error: unknown) => {
+    console.error("QT 통계 롤백에 실패했습니다.", error);
+  });
 }
 
 export async function getQTEntry(entryId: string) {
