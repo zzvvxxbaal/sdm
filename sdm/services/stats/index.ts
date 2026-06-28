@@ -1,1 +1,2 @@
-export { getAdminStats, type AdminStats } from "./statsService";
+export { getAdminStats, type AdminStats, getAnalyticsStats, type AnalyticsStats } from "./statsService";
+

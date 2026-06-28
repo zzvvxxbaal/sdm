@@ -1,13 +1,11 @@
 "use client";
 
-import { useAuth } from "@/features/auth";
 import { useAnalyticsStats } from "@/hooks/useAnalyticsStats";
 import { AnalyticsGrid, ActivityFeed } from "@/components/admin";
 import { PageHeader } from "@/components/ui";
 import { Users, BookOpen, Heart, Megaphone, Calendar } from "lucide-react";
 
 export default function AnalyticsDashboardPage() {
-  const { user } = useAuth();
   const { stats, isLoading } = useAnalyticsStats();
 
   const fmt = (value: number | undefined) => (isLoading ? "—" : value ?? 0);

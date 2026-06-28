@@ -41,10 +41,12 @@ export default function UserAnalyticsPage() {
   const filteredUsers =
     selectedRole === "all" ? users : users.filter((u) => u.role === selectedRole);
 
-  const formatDate = (date: any) => {
+  const formatDate = (date: unknown) => {
     if (!date) return "—";
     try {
-      const d = date.toDate?.() || new Date(date);
+      const d = typeof date === "object" && date !== null && "toDate" in (date as object)
+        ? (date as { toDate(): Date }).toDate()
+        : new Date(date as string | number);
       return d.toLocaleDateString("ko-KR", {
         year: "numeric",
         month: "2-digit",
