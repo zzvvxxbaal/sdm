@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Bell, Church, CircleUserRound } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -28,12 +29,16 @@ export function TopHeader() {
       }}
     >
       <ResponsiveContainer className="flex h-16 items-center justify-between">
-        <div className="flex items-center gap-3">
+        <Link
+          href="/"
+          aria-label="SDM 홈으로 이동"
+          className="flex items-center gap-3 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-300"
+        >
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-neutral-950 text-white shadow-[0_8px_20px_-16px_rgba(15,23,42,0.7)]">
             <Church className="h-4 w-4" />
           </div>
           <span className="text-sm font-semibold tracking-[0.18em] text-neutral-900">SDM</span>
-        </div>
+        </Link>
         <div className="flex items-center gap-2">
           <button
             type="button"
