@@ -8,7 +8,7 @@ export function Card({ className, children, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-[1.5rem] border border-black/[0.06] bg-white p-5 shadow-[0_18px_45px_-36px_rgba(15,23,42,0.35)] transition-transform duration-200",
+        "rounded-[1.5rem] border border-black/[0.1] bg-white p-5 shadow-[0_18px_45px_-36px_rgba(15,23,42,0.35)] transition-transform duration-200",
         "motion-safe:lg:hover:-translate-y-1 motion-safe:lg:hover:scale-[1.01]",
         className
       )}
