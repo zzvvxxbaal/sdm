@@ -6,6 +6,7 @@ import { db } from "@/firebase/config";
 import { COLLECTIONS } from "@/constants/collections";
 import { PageHeader, Spinner } from "@/components/ui";
 import { ROLE_LABELS, ROLE_COLORS } from "@/types/role";
+import { formatDateKorean } from "@/utils/formatDate";
 import type { UserModel } from "@/models/user";
 import type { UserRole } from "@/types/role";
 
@@ -40,22 +41,6 @@ export default function UserAnalyticsPage() {
 
   const filteredUsers =
     selectedRole === "all" ? users : users.filter((u) => u.role === selectedRole);
-
-  const formatDate = (date: unknown) => {
-    if (!date) return "—";
-    try {
-      const d = typeof date === "object" && date !== null && "toDate" in (date as object)
-        ? (date as { toDate(): Date }).toDate()
-        : new Date(date as string | number);
-      return d.toLocaleDateString("ko-KR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      });
-    } catch {
-      return "—";
-    }
-  };
 
   if (loading) {
     return (
@@ -130,7 +115,7 @@ export default function UserAnalyticsPage() {
                   {ROLE_LABELS[user.role as UserRole] || user.role}
                 </span>
                 <p className="text-xs text-[#737373] dark:text-[#a3a3a3]">
-                  {formatDate(user.createdAt)}
+                  {formatDateKorean(user.createdAt)}
                 </p>
               </div>
             </div>

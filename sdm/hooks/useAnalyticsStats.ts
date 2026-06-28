@@ -14,7 +14,8 @@ export function useAnalyticsStats() {
       try {
         const result = await getAnalyticsStats();
         if (active) setStats(result);
-      } catch {
+      } catch (err) {
+        console.error("Failed to load analytics stats:", err);
         if (active) setError("분석 데이터를 불러오지 못했습니다.");
       } finally {
         if (active) setIsLoading(false);
