@@ -51,7 +51,7 @@ service cloud.firestore {
       return name in [
         'users', 'teams', 'cells', 'organization_settings',
         'announcements', 'events', 'bulletins', 'playlists',
-        'daily_content', 'audit_logs'
+        'daily_content', 'audit_logs', 'qt_entries'
       ];
     }
 
@@ -162,6 +162,22 @@ service cloud.firestore {
       allow read: if isAdminPlus();
       allow create: if isLeaderPlus();
       allow update, delete: if false;
+    }
+
+    // ---------- QT entries (personal devotion journals) ----------
+    // Users can read/write their own QT entries. Leaders can read all (future group feature).
+    // Admins have full access.
+    match /qt_entries/{entryId} {
+      allow get: if isOwner(resource.data.userId)
+        || isLeaderPlus()
+        || isAdminPlus();
+      allow list: if isLeaderPlus() || isAdminPlus();
+      allow create: if isApprovedActive()
+        && request.resource.data.userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId)
+        || isAdminPlus();
+      allow delete: if isOwner(resource.data.userId)
+        || isAdminPlus();
     }
 
     // ---------- Default: approved members read; leaders write ----------
