@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 
 import { useAuth } from "@/features/auth";
 import { hasAnyRole } from "@/features/auth/utils/roles";
-import { ADMIN_ACCESS_ROLES } from "@/types/role";
+import { ADMIN_ACCESS_ROLES, ANALYTICS_ACCESS_ROLES } from "@/types/role";
 import { FullScreenSpinner } from "@/components/ui";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -15,7 +15,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
 
-  const hasAccess = user ? hasAnyRole(user.role, ADMIN_ACCESS_ROLES) : false;
+  // Check if this is an analytics route
+  const isAnalyticsRoute =
+    pathname.startsWith("/admin/analytics") || pathname.startsWith("/admin/users");
+
+  // Determine required roles based on route
+  const requiredRoles = isAnalyticsRoute ? ANALYTICS_ACCESS_ROLES : ADMIN_ACCESS_ROLES;
+  const hasAccess = user ? hasAnyRole(user.role, requiredRoles) : false;
 
   useEffect(() => {
     if (!isLoading && !hasAccess) router.replace("/");

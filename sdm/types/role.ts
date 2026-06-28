@@ -48,6 +48,15 @@ export const ADMIN_ACCESS_ROLES: UserRole[] = [
   UserRole.SUPER_ADMIN,
 ];
 
+/**
+ * Roles permitted to access analytics (read-only). Leaders and admins can view analytics.
+ */
+export const ANALYTICS_ACCESS_ROLES: UserRole[] = [
+  UserRole.LEADER,
+  UserRole.ADMIN,
+  UserRole.SUPER_ADMIN,
+];
+
 export function hasRole(role: UserRole, required: UserRole): boolean {
   return ROLE_HIERARCHY[role] >= ROLE_HIERARCHY[required];
 }
