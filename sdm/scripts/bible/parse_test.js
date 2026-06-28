@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 const { readFileSync } = require('fs');
 const { join } = require('path');
 
@@ -15,14 +16,14 @@ function detectEncoding(buf) {
     const hasKorean = lines.some(l => /[\uac00-\ud7a3]/.test(l));
     const hasPattern = lines.some(l => /^[\uac00-\ud7a3]+\d+:\d+/.test(l));
     if (hasKorean && hasPattern) return { encoding: 'utf-8', text };
-  } catch (e) {}
+  } catch {}
   try {
     const text = buf.toString('cp949');
     const lines = text.split('\n').filter(l => l.trim()).slice(0, 10);
     const hasKorean = lines.some(l => /[\uac00-\ud7a3]/.test(l));
     const hasPattern = lines.some(l => /^[\uac00-\ud7a3]+\d+:\d+/.test(l));
     if (hasKorean && hasPattern) return { encoding: 'cp949', text };
-  } catch (e) {}
+  } catch {}
   return { encoding: 'unknown', text: buf.toString('utf8') };
 }
 
@@ -66,9 +67,9 @@ console.log('First:', verses[0]);
 console.log('Last:', verses[verses.length - 1]);
 
 // Find John 3:16
-const joh316 = verses.find(v => v.bookAbbreviation === '\u694' && v.chapterNumber === 3 && v.verseNumber === 16);
+const joh316 = verses.find(v => v.bookAbbreviation === '\u0694' && v.chapterNumber === 3 && v.verseNumber === 16);
 console.log('John 3:16:', joh316 ? joh316.text.substring(0, 60) : 'NOT FOUND');
 
 // Find Romans 8:28
-const rom828 = verses.find(v => v.bookAbbreviation === '\u86d' && v.chapterNumber === 8 && v.verseNumber === 28);
+const rom828 = verses.find(v => v.bookAbbreviation === '\u086d' && v.chapterNumber === 8 && v.verseNumber === 28);
 console.log('Romans 8:28:', rom828 ? rom828.text.substring(0, 60) : 'NOT FOUND');

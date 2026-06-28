@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   BookOpen,
-  Search,
   PenLine,
   User,
   Settings,

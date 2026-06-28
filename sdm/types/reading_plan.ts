@@ -1,3 +1,5 @@
+import type { FirestoreTimestamp } from "./firestore";
+
 export interface ReadingPlan {
   id: string;
   name: string;
@@ -6,8 +8,8 @@ export interface ReadingPlan {
   assignments: ReadingPlanAssignment[];
   isActive: boolean;
   isDefault: boolean;
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 }
 
 export interface ReadingPlanInput {
@@ -32,6 +34,6 @@ export interface ReadingProgress {
   planId: string;
   progressId: string;
   completedAssignments: number[];
-  createdAt?: any;
-  updatedAt?: any;
+  createdAt?: FirestoreTimestamp;
+  updatedAt?: FirestoreTimestamp;
 }

@@ -16,7 +16,6 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
 import type {
   ReadingPlan,

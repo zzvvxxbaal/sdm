@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { join } from "path";
-import { parseBibleText, parseBibleBuffer } from "@/lib/bible/parser";
+import { parseBibleText } from "@/lib/bible/parser";
 import { detectBibleEncoding } from "@/lib/bible/encoding";
 import { writeFileSync } from "fs";
 
