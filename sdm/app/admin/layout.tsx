@@ -10,14 +10,17 @@ import { hasAnyRole } from "@/features/auth/utils/roles";
 import { ADMIN_ACCESS_ROLES, ANALYTICS_ACCESS_ROLES } from "@/types/role";
 import { FullScreenSpinner } from "@/components/ui";
 
+const ANALYTICS_ROUTES = ["/admin/analytics", "/admin/users"];
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
   // Check if this is an analytics route
-  const isAnalyticsRoute =
-    pathname.startsWith("/admin/analytics") || pathname.startsWith("/admin/users");
+  const isAnalyticsRoute = ANALYTICS_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  );
 
   // Determine required roles based on route
   const requiredRoles = isAnalyticsRoute ? ANALYTICS_ACCESS_ROLES : ADMIN_ACCESS_ROLES;

@@ -1,6 +1,6 @@
 "use client";
 
-import { cn } from "@/lib/utils";
+import { cn, toDate } from "@/lib/utils";
 import { Heart, Loader2, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
@@ -41,9 +41,7 @@ export function PrayerCard({
   const canMarkAnswered = role ? isLeader(role) || isAdmin(role) : false;
   const canDelete = role ? isAdmin(role) : false;
 
-  const createdAtTime = prayer.createdAt && typeof prayer.createdAt === "object" && "toDate" in (prayer.createdAt as unknown as Record<string, unknown>)
-    ? ((prayer.createdAt as unknown as Record<string, unknown>).toDate as () => Date)()
-    : new Date();
+  const createdAtTime = toDate(prayer.createdAt);
 
   const timeAgo = formatDistanceToNow(createdAtTime, {
     locale: ko,

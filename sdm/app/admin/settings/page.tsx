@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { useSettings } from "@/features/admin/hooks/useSettings";
 import {
@@ -17,10 +17,18 @@ const PRESETS = ["순", "셀"];
 
 export default function AdminSettingsPage() {
   const { cellLabel, isLoading, saveCellLabel } = useSettings();
-  const [singular, setSingular] = useState(cellLabel.singular);
-  const [plural, setPlural] = useState(cellLabel.plural);
+  const [singular, setSingular] = useState("");
+  const [plural, setPlural] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  // Sync state when cellLabel loads
+  useEffect(() => {
+    if (cellLabel && cellLabel.singular && cellLabel.plural) {
+      setSingular(cellLabel.singular);
+      setPlural(cellLabel.plural);
+    }
+  }, [cellLabel]);
 
   const onSave = async () => {
     setSaving(true);

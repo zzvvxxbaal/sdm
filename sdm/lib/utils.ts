@@ -10,6 +10,20 @@ export function cn(...inputs: ClassValue[]): string {
 }
 
 /**
+ * Converts a Firestore timestamp to a Date object.
+ * Handles both Firestore Timestamp objects and standard Date objects.
+ */
+export function toDate(value: unknown): Date {
+  if (value instanceof Date) {
+    return value;
+  }
+  if (typeof value === "object" && value !== null && "toDate" in value) {
+    return (value as Record<string, () => Date>).toDate();
+  }
+  return new Date();
+}
+
+/**
  * Formats a date string to a localized date.
  */
 export function formatDate(date: string | Date | number): string {
