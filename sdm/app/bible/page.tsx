@@ -120,8 +120,12 @@ export default function BiblePage() {
                   <VerseCard
                     key={result.verse.id}
                     verse={result.verse}
-                    onBookmark={(v) => console.log("Bookmark:", v.id)}
-                    onShare={(v) => console.log("Share:", v.id)}
+                    onBookmark={(v) => {
+                      // TODO: Implement bookmark functionality
+                    }}
+                    onShare={(v) => {
+                      // TODO: Implement share functionality
+                    }}
                   />
                 ))}
               </div>
