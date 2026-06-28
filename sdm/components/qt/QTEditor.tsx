@@ -67,7 +67,6 @@ export function QTEditor({ onSubmit, isLoading = false }: QTEditorProps) {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "QT 저장에 실패했습니다";
       setError(errorMessage);
-      console.error("QT submission error:", err);
     } finally {
       setIsSubmitting(false);
     }

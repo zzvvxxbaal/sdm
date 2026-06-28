@@ -83,8 +83,8 @@ export function ActivityFeed({ maxItems = 10 }: ActivityFeedProps) {
         // Sort by timestamp descending and limit
         const sorted = combined.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
         setActivities(sorted.slice(0, maxItems));
-      } catch (error) {
-        console.error("Failed to load activities:", error);
+      } catch {
+        // Silent error handling in activity feed
       } finally {
         setLoading(false);
       }

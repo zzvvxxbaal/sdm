@@ -56,7 +56,6 @@ export function PrayerEditor({ onSubmit, isLoading = false }: PrayerEditorProps)
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "기도제목 저장에 실패했습니다";
       setError(errorMessage);
-      console.error("Prayer submission error:", err);
     } finally {
       setIsSubmitting(false);
     }

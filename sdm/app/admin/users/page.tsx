@@ -29,8 +29,8 @@ export default function UserAnalyticsPage() {
           ...doc.data(),
         })) as (UserModel & { id: string })[];
         setUsers(userData);
-      } catch (error) {
-        console.error("Failed to load users:", error);
+      } catch {
+        // Silent error handling
       } finally {
         setLoading(false);
       }
