@@ -16,6 +16,14 @@ export interface AdminStats {
   totalCells: number;
 }
 
+export interface AnalyticsStats {
+  totalUsers: number;
+  totalQTEntries: number;
+  totalPrayers: number;
+  totalAnnouncements: number;
+  totalEvents: number;
+}
+
 export async function getAdminStats(): Promise<AdminStats> {
   const usersRef = collection(db, COLLECTIONS.USERS);
 
@@ -31,5 +39,26 @@ export async function getAdminStats(): Promise<AdminStats> {
     pendingApprovals: pending.data().count,
     totalTeams: teams.data().count,
     totalCells: cells.data().count,
+  };
+}
+
+/**
+ * Get comprehensive analytics statistics for dashboard
+ */
+export async function getAnalyticsStats(): Promise<AnalyticsStats> {
+  const [users, qtEntries, prayers, announcements, events] = await Promise.all([
+    getCountFromServer(collection(db, COLLECTIONS.USERS)),
+    getCountFromServer(collection(db, "qt_entries")),
+    getCountFromServer(collection(db, COLLECTIONS.PRAYER_REQUESTS)),
+    getCountFromServer(collection(db, COLLECTIONS.ANNOUNCEMENTS)),
+    getCountFromServer(collection(db, COLLECTIONS.EVENTS)),
+  ]);
+
+  return {
+    totalUsers: users.data().count,
+    totalQTEntries: qtEntries.data().count,
+    totalPrayers: prayers.data().count,
+    totalAnnouncements: announcements.data().count,
+    totalEvents: events.data().count,
   };
 }

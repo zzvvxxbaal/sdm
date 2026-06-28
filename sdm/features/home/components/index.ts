@@ -10,5 +10,6 @@ export { PlaylistCard } from "./PlaylistCard";
 export { MyChurchInfoCard } from "./MyChurchInfoCard";
 export { ActivitySummaryCard } from "./ActivitySummaryCard";
 export { QuickActions } from "./QuickActions";
+export { AdminShortcutCard } from "./AdminShortcutCard";
 export { HomeSkeleton } from "./HomeSkeleton";
 export { RecentPrayersCard } from "./RecentPrayersCard";

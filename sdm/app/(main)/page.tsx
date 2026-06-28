@@ -8,6 +8,7 @@ import {
   TodaysQtCard,
   TodaysUserQtCard,
   QuickActions,
+  AdminShortcutCard,
   AnnouncementsPreview,
   WeeklyScheduleCard,
   BulletinPreviewCard,
@@ -52,6 +53,7 @@ export default function MainPage() {
             <TodaysUserQtCard />
             <RecentPrayersCard />
             <QuickActions />
+            <AdminShortcutCard />
             <AnnouncementsPreview
               announcements={home.announcements}
               error={home.errors.announcements}
