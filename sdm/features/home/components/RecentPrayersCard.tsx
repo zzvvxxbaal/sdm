@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 import type { PrayerRequestModel } from "@/models/prayer_request";
 
 export function RecentPrayersCard() {
-  const { prayers, loading, error, createPrayer, incrementPrayerCount } = usePrayers();
+  const { prayers, loading, error, createPrayer } = usePrayers();
   const [showEditor, setShowEditor] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

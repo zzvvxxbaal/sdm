@@ -51,94 +51,81 @@ export function usePrayers(): UsePrayersResult {
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
-      console.error("Failed to fetch prayers:", error);
     } finally {
       setLoading(false);
     }
-  }, [user?.uid]);
+  }, [user]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchPrayers();
   }, [fetchPrayers]);
 
-  const createPrayerRecord = useCallback(
-    async (data: Omit<PrayerRequestModel, "id" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy">): Promise<string> => {
-      if (!user?.uid) throw new Error("User not authenticated");
+  const createPrayerRecord = async (
+    data: Omit<PrayerRequestModel, "id" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy">
+  ): Promise<string> => {
+    if (!user?.uid) throw new Error("User not authenticated");
 
-      try {
-        const id = await createPrayer(user.uid, data);
-        await fetchPrayers();
-        return id;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [user?.uid, fetchPrayers]
-  );
+    try {
+      const id = await createPrayer(user.uid, data);
+      await fetchPrayers();
+      return id;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const markAnswered = useCallback(
-    async (prayerId: string): Promise<void> => {
-      if (!user?.uid) throw new Error("User not authenticated");
+  const markAnsweredHandler = async (prayerId: string): Promise<void> => {
+    if (!user?.uid) throw new Error("User not authenticated");
 
-      try {
-        await markAsAnswered(prayerId, user.uid);
-        await fetchPrayers();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [user?.uid, fetchPrayers]
-  );
+    try {
+      await markAsAnswered(prayerId, user.uid);
+      await fetchPrayers();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const markUnanswered = useCallback(
-    async (prayerId: string): Promise<void> => {
-      if (!user?.uid) throw new Error("User not authenticated");
+  const markUnansweredHandler = async (prayerId: string): Promise<void> => {
+    if (!user?.uid) throw new Error("User not authenticated");
 
-      try {
-        await markAsUnanswered(prayerId, user.uid);
-        await fetchPrayers();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [user?.uid, fetchPrayers]
-  );
+    try {
+      await markAsUnanswered(prayerId, user.uid);
+      await fetchPrayers();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const deletePrayerRecord = useCallback(
-    async (prayerId: string): Promise<void> => {
-      if (!user?.uid) throw new Error("User not authenticated");
+  const deletePrayerHandler = async (prayerId: string): Promise<void> => {
+    if (!user?.uid) throw new Error("User not authenticated");
 
-      try {
-        await deletePrayer(prayerId, user.uid);
-        await fetchPrayers();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [user?.uid, fetchPrayers]
-  );
+    try {
+      await deletePrayer(prayerId, user.uid);
+      await fetchPrayers();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const incrementPrayerCountFn = useCallback(
-    async (prayerId: string): Promise<void> => {
-      try {
-        await incrementPrayerCount(prayerId);
-        await fetchPrayers();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [fetchPrayers]
-  );
+  const incrementPrayerCountHandler = async (prayerId: string): Promise<void> => {
+    try {
+      await incrementPrayerCount(prayerId);
+      await fetchPrayers();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
   return {
     prayers,
@@ -146,10 +133,10 @@ export function usePrayers(): UsePrayersResult {
     loading,
     error,
     createPrayer: createPrayerRecord,
-    markAsAnswered: markAnswered,
-    markAsUnanswered: markUnanswered,
-    deletePrayer: deletePrayerRecord,
-    incrementPrayerCount: incrementPrayerCountFn,
+    markAsAnswered: markAnsweredHandler,
+    markAsUnanswered: markUnansweredHandler,
+    deletePrayer: deletePrayerHandler,
+    incrementPrayerCount: incrementPrayerCountHandler,
     refetch: fetchPrayers,
   };
 }

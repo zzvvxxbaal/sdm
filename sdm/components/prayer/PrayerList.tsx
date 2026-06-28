@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { Loader2, Filter } from "lucide-react";
 import { PrayerCard } from "./PrayerCard";
 import type { PrayerRequestModel } from "@/models/prayer_request";
-import { useAuth } from "@/features/auth";
 
 interface PrayerListProps {
   prayers: (PrayerRequestModel & { id: string })[];
@@ -32,7 +31,6 @@ export function PrayerList({
   title = "기도제목",
   emptyMessage = "기도제목이 없습니다",
 }: PrayerListProps) {
-  const { user } = useAuth();
   const [supportedPrayers, setSupportedPrayers] = useState<Set<string>>(new Set());
   const [loadingPrayers, setLoadingPrayers] = useState<Set<string>>(new Set());
 

@@ -120,10 +120,12 @@ export default function BiblePage() {
                   <VerseCard
                     key={result.verse.id}
                     verse={result.verse}
-                    onBookmark={(v) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    onBookmark={(verse) => {
                       // TODO: Implement bookmark functionality
                     }}
-                    onShare={(v) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    onShare={(verse) => {
                       // TODO: Implement share functionality
                     }}
                   />

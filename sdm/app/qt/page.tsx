@@ -9,7 +9,7 @@ import { ko } from "date-fns/locale";
 import type { QTEntryInput } from "@/types/qt";
 
 export default function QtPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { entries, todayQT, loading, error, createQT, deleteQT } = useQT();
 
   const handleSubmit = async (data: QTEntryInput) => {

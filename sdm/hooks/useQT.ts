@@ -55,61 +55,51 @@ export function useQT(): UseQTResult {
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
       setError(error);
-      console.error("Failed to fetch QT entries:", error);
     } finally {
       setLoading(false);
     }
-  }, [user?.uid, today]);
+  }, [user, today]);
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetchEntries();
   }, [fetchEntries]);
 
-  const createQT = useCallback(
-    async (data: QTEntryInput): Promise<string> => {
-      if (!user?.uid) throw new Error("User not authenticated");
+  const createQT = async (data: QTEntryInput): Promise<string> => {
+    if (!user?.uid) throw new Error("User not authenticated");
 
-      try {
-        const id = await createQTEntry(user.uid, data);
-        await fetchEntries();
-        return id;
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [user?.uid, fetchEntries]
-  );
+    try {
+      const id = await createQTEntry(user.uid, data);
+      await fetchEntries();
+      return id;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const deleteQT = useCallback(
-    async (id: string): Promise<void> => {
-      try {
-        await deleteQTEntry(id);
-        await fetchEntries();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [fetchEntries]
-  );
+  const deleteQT = async (id: string): Promise<void> => {
+    try {
+      await deleteQTEntry(id);
+      await fetchEntries();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
-  const updateQT = useCallback(
-    async (id: string, data: Partial<QTEntryInput>): Promise<void> => {
-      try {
-        await updateQTEntry(id, data);
-        await fetchEntries();
-      } catch (err) {
-        const error = err instanceof Error ? err : new Error(String(err));
-        setError(error);
-        throw error;
-      }
-    },
-    [fetchEntries]
-  );
+  const updateQT = async (id: string, data: Partial<QTEntryInput>): Promise<void> => {
+    try {
+      await updateQTEntry(id, data);
+      await fetchEntries();
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error(String(err));
+      setError(error);
+      throw error;
+    }
+  };
 
   return {
     entries,
