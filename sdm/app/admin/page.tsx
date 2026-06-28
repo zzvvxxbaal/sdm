@@ -10,6 +10,11 @@ import {
   Boxes,
 } from "lucide-react";
 
+import { getAuth } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useEffect, useState } from "react";
+
 import { useAdminStats } from "@/features/admin/hooks/useAdminStats";
 import { AdminNavCard } from "@/features/admin/components";
 import { PageHeader, StatItem } from "@/components/ui";
@@ -17,6 +22,25 @@ import { PageHeader, StatItem } from "@/components/ui";
 export default function AdminDashboardPage() {
   const { stats, isLoading } = useAdminStats();
   const fmt = (value: number | undefined) => (isLoading ? "—" : value ?? 0);
+  const [role, setRole] = useState<string | null>(null);
+
+useEffect(() => {
+  const fetchRole = async () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+
+    if (!user) return;
+
+    const snap = await getDoc(doc(db, "users", user.uid));
+    setRole(snap.data()?.role || null);
+  };
+
+  fetchRole();
+}, []);
+
+if (role && role !== "admin") {
+  return <div>Access Denied</div>;
+}
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
