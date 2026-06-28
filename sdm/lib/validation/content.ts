@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseReference } from "@/services/bible/bibleService";
 
 const optionalText = z.string().max(2000).optional().or(z.literal(""));
 const urlOrEmpty = z
@@ -21,8 +22,9 @@ export const eventFormSchema = z.object({
   startDate: z.string().min(1, "시작일을 선택해주세요"),
   endDate: z.string().optional().or(z.literal("")),
   location: z.string().max(200).optional().or(z.literal("")),
-  category: z.enum(["worship", "meeting", "retreat", "service", "social", "other"]),
+  category: z.enum(["worship", "meeting", "event", "special_service"]),
   description: optionalText,
+  isAllDay: z.boolean().default(false),
 });
 
 export type EventFormData = z.infer<typeof eventFormSchema>;
@@ -32,8 +34,14 @@ export const bulletinFormSchema = z.object({
   date: z.string().min(1, "날짜를 선택해주세요"),
   fileURL: urlOrEmpty,
   preacher: z.string().max(100).optional().or(z.literal("")),
-  scripture: z.string().max(200).optional().or(z.literal("")),
+  scripture: z
+    .string()
+    .max(200)
+    .optional()
+    .or(z.literal(""))
+    .refine((value) => !value || parseReference(value) !== null, "예: 요 3:16 형식으로 입력해주세요"),
   sermonTitle: z.string().max(200).optional().or(z.literal("")),
+  content: optionalText,
 });
 
 export type BulletinFormData = z.infer<typeof bulletinFormSchema>;
@@ -45,7 +53,7 @@ export const playlistSongSchema = z.object({
 
 export const playlistFormSchema = z.object({
   name: z.string().min(1, "재생목록 이름을 입력해주세요").max(100),
-  category: z.enum(["worship", "praise", "contemplation", "special", "other"]),
+  category: z.enum(["worship", "qt_music", "personal_devotion"]),
   songs: z.array(playlistSongSchema),
 });
 

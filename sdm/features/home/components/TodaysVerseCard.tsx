@@ -1,3 +1,4 @@
+import { BibleReferenceLink } from "@/components/bible/BibleReferenceLink";
 import { BookOpen } from "lucide-react";
 import type { TodaysVerse } from "@/models/daily_content";
 
@@ -23,9 +24,9 @@ export function TodaysVerseCard({
           <p className="mt-3 text-[15px] font-medium leading-relaxed">
             {verse.text}
           </p>
-          <p className="mt-3 text-sm font-semibold text-white/90">
-            — {verse.reference}
-          </p>
+          <div className="mt-3 text-sm font-semibold text-white/90">
+            — <BibleReferenceLink reference={verse.reference} className="text-white underline-offset-2 hover:underline" />
+          </div>
         </>
       ) : (
         <p className="mt-3 text-sm text-white/80">{fallback}</p>

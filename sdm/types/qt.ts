@@ -1,32 +1,41 @@
+import type { BibleReference } from "@/types/bible";
+
 export type QTVisibility = "private" | "cell" | "team" | "church" | "leaders" | "admin";
+export type FirestoreDateValue =
+  | string
+  | Date
+  | {
+      toDate?: () => Date;
+      seconds?: number;
+    };
 
 export interface QTEntry {
   id: string;
   userId: string;
   userName: string;
-  bibleReference: {
-    bookId: string;
-    bookName: string;
-    chapterNumber: number;
-    startVerse: number;
-    endVerse: number | null;
-  };
+  teamId: string | null;
+  cellId: string | null;
+  entryDate: string;
+  dateKey: string;
+  monthKey: string;
+  bibleReference: BibleReference;
   title: string;
   meditation: string;
   prayer: string;
   application: string;
   tags: string[];
+  searchTokens: string[];
   emotion: string | null;
   visibility: QTVisibility;
   isFavorite: boolean;
   isArchived: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: FirestoreDateValue;
+  updatedAt: FirestoreDateValue;
 }
 
 export interface QTEntryInput {
-  userName: string;
-  bibleReference: QTEntry["bibleReference"];
+  entryDate: string;
+  bibleReference: BibleReference;
   title: string;
   meditation: string;
   prayer: string;
@@ -38,23 +47,16 @@ export interface QTEntryInput {
   isArchived: boolean;
 }
 
-export interface QTTemplate {
-  id: string;
-  name: string;
-  fields: QTTemplateField[];
-  isDefault: boolean;
-  isActive: boolean;
-  createdAt: string;
-}
-
-export interface QTTemplateField {
-  id: string;
-  name: string;
-  label: string;
-  type: "text" | "textarea" | "select" | "tags";
-  placeholder: string | null;
-  required: boolean;
-  order: number;
+export interface QTQueryFilters {
+  monthKey?: string;
+  dateKey?: string;
+  tag?: string;
+  bookId?: string;
+  visibility?: QTVisibility | "all";
+  favoriteOnly?: boolean;
+  archivedOnly?: boolean;
+  search?: string;
+  limit?: number;
 }
 
 export interface QTCalendarDay {
@@ -85,20 +87,4 @@ export interface QTMonthlySummary {
   emotions: Record<string, number>;
   topTags: string[];
   topBooks: string[];
-}
-
-export interface TodaysQT {
-  id: string;
-  date: string;
-  bibleReference: {
-    bookId: string;
-    bookName: string;
-    chapterNumber: number;
-    startVerse: number;
-    endVerse: number | null;
-  };
-  title: string;
-  description: string | null;
-  createdBy: string;
-  createdAt: string;
 }

@@ -3,7 +3,6 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ---------- Helpers ----------
     function isSignedIn() {
       return request.auth != null;
     }
@@ -30,8 +29,6 @@ service cloud.firestore {
         && myDoc().isActive == true;
     }
 
-    // Privileged predicates require an approved AND active account, so a
-    // rejected or deactivated leader/admin loses all elevated access.
     function isLeaderPlus() {
       return isApprovedActive() && myRole() in ['leader', 'admin', 'super_admin'];
     }
@@ -44,18 +41,15 @@ service cloud.firestore {
       return isApprovedActive() && myRole() == 'super_admin';
     }
 
-    // Collections that have their own explicit match block below. The generic
-    // catch-all opts out of these so its permissive leader-write default can
-    // never widen (union) the stricter, authoritative per-collection rules.
     function hasExplicitRules(name) {
       return name in [
         'users', 'teams', 'cells', 'organization_settings',
         'announcements', 'events', 'bulletins', 'playlists',
-        'daily_content', 'audit_logs'
+        'daily_content', 'audit_logs', 'qt_entries', 'bible_favorites', 'bible_history',
+        'prayer_requests', 'notifications', 'worship_favorites'
       ];
     }
 
-    // Fields a member may NEVER change on their own document.
     function privilegedUnchanged() {
       let before = resource.data;
       let after = request.resource.data;
@@ -76,9 +70,6 @@ service cloud.firestore {
         && after.email == before.email;
     }
 
-    // Role assignment guard (anti privilege-escalation): the role may stay the
-    // same; only super_admin may assign any role; admin may assign up to admin
-    // but never super_admin; leaders and members may never change role.
     function validRoleChange() {
       let after = request.resource.data.role;
       return after == resource.data.role
@@ -86,7 +77,6 @@ service cloud.firestore {
         || (myRole() == 'admin' && after in ['user', 'member', 'leader', 'admin']);
     }
 
-    // A new user may only create their own doc as an unprivileged, pending member.
     function validSelfCreate() {
       let d = request.resource.data;
       return d.role == 'user'
@@ -96,24 +86,56 @@ service cloud.firestore {
         && d.approvedAt == null;
     }
 
-    // ---------- Users ----------
+    function prayerDoc(prayerId) {
+      return get(/databases/$(database)/documents/prayer_requests/$(prayerId)).data;
+    }
+
+    function canReadPrayer(data) {
+      return isApprovedActive()
+        && (
+          data.visibility == 'church'
+          || (data.visibility == 'private' && data.createdBy == request.auth.uid)
+          || (data.visibility == 'cell' && myDoc().cellId != null && data.cellId == myDoc().cellId)
+          || (data.visibility == 'team' && myDoc().teamId != null && data.teamId == myDoc().teamId)
+          || (data.visibility == 'leaders' && isLeaderPlus())
+          || isLeaderPlus()
+          || data.createdBy == request.auth.uid
+        );
+    }
+
+    function canManagePrayer(data) {
+      return isApprovedActive() && (data.createdBy == request.auth.uid || isLeaderPlus());
+    }
+
+    function notificationReadOnlyUpdate() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return after.userId == before.userId
+        && after.type == before.type
+        && after.audienceType == before.audienceType
+        && after.title == before.title
+        && after.body == before.body
+        && after.link == before.link
+        && after.relatedCollection == before.relatedCollection
+        && after.relatedId == before.relatedId
+        && after.status == before.status
+        && after.metadata == before.metadata
+        && after.scheduledFor == before.scheduledFor
+        && after.sentAt == before.sentAt
+        && after.createdAt == before.createdAt
+        && after.createdBy == before.createdBy
+        && after.isActive == before.isActive;
+    }
+
     match /users/{uid} {
       allow get: if isOwner(uid) || isLeaderPlus();
       allow list: if isLeaderPlus();
-
       allow create: if isOwner(uid) && validSelfCreate();
-
-      // Owner may edit their own profile but never privileged fields.
-      // Leaders/Admins may edit privileged fields on any member, but role
-      // changes are constrained by validRoleChange() to prevent escalation.
       allow update: if (isOwner(uid) && privilegedUnchanged())
         || (isLeaderPlus() && validRoleChange());
-
       allow delete: if isAdminPlus();
     }
 
-    // ---------- Organization structure (teams / cells) ----------
-    // Admin core: only admins/super_admins may edit the org structure.
     match /teams/{teamId} {
       allow read: if isApprovedActive();
       allow write: if isAdminPlus();
@@ -129,8 +151,6 @@ service cloud.firestore {
       allow write: if isAdminPlus();
     }
 
-    // ---------- Content (announcements / events / bulletins / playlists) ----------
-    // Approved members read; only admins author and manage content.
     match /announcements/{docId} {
       allow read: if isApprovedActive();
       allow write: if isAdminPlus();
@@ -151,22 +171,76 @@ service cloud.firestore {
       allow write: if isAdminPlus();
     }
 
-    // ---------- Daily content (today's verse / QT) ----------
+    match /worship_favorites/{docId} {
+      allow read: if isApprovedActive() && resource.data.userId == request.auth.uid;
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isApprovedActive() && resource.data.userId == request.auth.uid;
+    }
+
     match /daily_content/{docId} {
       allow read: if isApprovedActive();
       allow write: if isAdminPlus();
     }
 
-    // ---------- Audit logs (admin only) ----------
+    match /qt_entries/{docId} {
+      allow read: if isApprovedActive()
+        && (resource.data.userId == request.auth.uid
+          || resource.data.visibility in ['cell', 'team', 'church', 'leaders', 'admin']);
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if isApprovedActive() && resource.data.userId == request.auth.uid;
+    }
+
+    match /bible_favorites/{docId} {
+      allow read, write: if isApprovedActive() && resource.data.userId == request.auth.uid;
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /bible_history/{docId} {
+      allow read, write: if isApprovedActive() && resource.data.userId == request.auth.uid;
+      allow create: if isApprovedActive() && request.resource.data.userId == request.auth.uid;
+    }
+
+    match /prayer_requests/{prayerId} {
+      allow get, list: if canReadPrayer(resource.data);
+      allow create: if isApprovedActive()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.updatedBy == request.auth.uid;
+      allow update, delete: if canManagePrayer(resource.data);
+
+      match /comments/{commentId} {
+        allow get, list: if canReadPrayer(prayerDoc(prayerId));
+        allow create: if isApprovedActive()
+          && canReadPrayer(prayerDoc(prayerId))
+          && request.resource.data.createdBy == request.auth.uid;
+        allow update, delete: if isApprovedActive()
+          && (resource.data.createdBy == request.auth.uid || isLeaderPlus());
+      }
+
+      match /likes/{uid} {
+        allow get, list: if canReadPrayer(prayerDoc(prayerId));
+        allow create, delete: if isApprovedActive()
+          && canReadPrayer(prayerDoc(prayerId))
+          && uid == request.auth.uid;
+        allow update: if false;
+      }
+    }
+
+    match /notifications/{docId} {
+      allow get, list: if isApprovedActive()
+        && (resource.data.userId == request.auth.uid || isLeaderPlus());
+      allow create, delete: if isAdminPlus();
+      allow update: if isAdminPlus()
+        || (isApprovedActive()
+          && resource.data.userId == request.auth.uid
+          && notificationReadOnlyUpdate());
+    }
+
     match /audit_logs/{logId} {
       allow read: if isAdminPlus();
       allow create: if isLeaderPlus();
       allow update, delete: if false;
     }
 
-    // ---------- Default: approved members read; leaders write ----------
-    // Excludes collections with explicit rules above so it cannot grant
-    // leader-level writes to admin-only (or owner-guarded) collections.
     match /{collection}/{docId} {
       allow read: if isApprovedActive();
       allow write: if isLeaderPlus() && !hasExplicitRules(collection);

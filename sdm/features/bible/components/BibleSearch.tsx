@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Search, X, Loader2 } from "lucide-react";
 import type { BibleSearchResult } from "@/types/bible";
@@ -15,6 +15,34 @@ interface BibleSearchProps {
   onSelectVerse: (verseId: string) => void;
 }
 
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function buildHighlightPattern(keyword: string) {
+  const trimmedKeyword = keyword.trim();
+  if (!trimmedKeyword) return null;
+
+  return new RegExp(`(${escapeRegExp(trimmedKeyword)})`, "gi");
+}
+
+function renderHighlightedText(
+  text: string,
+  highlightPattern: ReturnType<typeof buildHighlightPattern>
+) {
+  if (!highlightPattern) return text;
+
+  const parts = text.split(highlightPattern);
+
+  return parts.map((part, index) =>
+    index % 2 === 1 ? (
+      <mark key={index}>{part}</mark>
+    ) : (
+      <Fragment key={index}>{part}</Fragment>
+    )
+  );
+}
+
 export function BibleSearch({
   query,
   onQueryChange,
@@ -26,7 +54,8 @@ export function BibleSearch({
 }: BibleSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const highlightPattern = buildHighlightPattern(query);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -106,10 +135,9 @@ export function BibleSearch({
                         {result.verse.bookName} {result.verse.chapterNumber}:{result.verse.verseNumber}
                       </span>
                     </div>
-                    <p
-                      className="text-sm text-[#171717] dark:text-[#f5f5f5] leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: result.highlightedText }}
-                    />
+                    <p className="text-sm leading-relaxed text-[#171717] dark:text-[#f5f5f5]">
+                      {renderHighlightedText(result.displayText, highlightPattern)}
+                    </p>
                   </button>
                 ))}
               </div>

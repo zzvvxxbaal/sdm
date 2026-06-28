@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { FirestoreBase } from "@/types/firestore";
 import type { QueryDocumentSnapshot, SnapshotOptions } from "firebase/firestore";
+import { SCHEDULE_EVENT_TYPES, type ScheduleEventType } from "@/types/schedule";
 
 export const eventSchema = z.object({
   id: z.string().min(1),
@@ -10,7 +11,7 @@ export const eventSchema = z.object({
   startDate: z.string().min(1),
   endDate: z.string().nullable().optional(),
   isAllDay: z.boolean().default(false),
-  category: z.enum(["worship", "meeting", "retreat", "service", "social", "other"]).default("other"),
+  category: z.enum(SCHEDULE_EVENT_TYPES).default("event"),
   ministry: z.string().nullable().optional(),
   isRecurring: z.boolean().default(false),
   recurrenceRule: z.string().nullable().optional(),
@@ -30,7 +31,7 @@ export interface EventModel extends FirestoreBase {
   startDate: string;
   endDate: string | null;
   isAllDay: boolean;
-  category: "worship" | "meeting" | "retreat" | "service" | "social" | "other";
+  category: ScheduleEventType;
   ministry: string | null;
   isRecurring: boolean;
   recurrenceRule: string | null;
@@ -69,7 +70,7 @@ export const eventConverter = {
       startDate: data.startDate as string,
       endDate: (data.endDate as string) ?? null,
       isAllDay: (data.isAllDay as boolean) ?? false,
-      category: (data.category as EventModel["category"]) ?? "other",
+      category: (data.category as ScheduleEventType) ?? "event",
       ministry: (data.ministry as string) ?? null,
       isRecurring: (data.isRecurring as boolean) ?? false,
       recurrenceRule: (data.recurrenceRule as string) ?? null,

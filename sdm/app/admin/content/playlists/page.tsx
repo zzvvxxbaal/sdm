@@ -10,10 +10,8 @@ import type { PlaylistModel } from "@/models/playlist";
 
 const CATEGORY_LABELS: Record<PlaylistModel["category"], string> = {
   worship: "예배",
-  praise: "찬양",
-  contemplation: "묵상",
-  special: "특송",
-  other: "기타",
+  qt_music: "QT 음악",
+  personal_devotion: "개인 경건",
 };
 
 export default function PlaylistsPage() {
@@ -26,7 +24,7 @@ export default function PlaylistsPage() {
     <div className="mx-auto w-full max-w-2xl px-4 py-6">
       <PageHeader
         title="찬양 콘티"
-        description="예배 찬양 재생목록을 관리합니다"
+        description="예배·QT·개인 경건 재생목록을 관리합니다"
         action={
           <Button size="sm" onClick={() => { setEditing(null); setFormOpen(true); }}>
             <Plus className="h-4 w-4" /> 추가

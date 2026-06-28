@@ -56,10 +56,9 @@ export async function searchBibleByKeyword(
 
   snapshot.forEach((doc) => {
     const verse = doc.data() as BibleVerse;
-    const highlightedText = highlightText(verse.text, keyword);
     results.push({
       verse,
-      highlightedText,
+      displayText: verse.text,
       matchScore: calculateMatchScore(verse.text, keyword),
     });
   });
@@ -72,15 +71,6 @@ export async function searchBibleByKeyword(
  */
 export async function quickSearch(keyword: string): Promise<BibleSearchResult[]> {
   return searchBibleByKeyword(keyword, { limit: 10 });
-}
-
-/**
- * Highlight matching words in verse text.
- */
-export function highlightText(text: string, keyword: string): string {
-  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const regex = new RegExp(`(${escaped})`, "gi");
-  return text.replace(regex, "<mark>$1</mark>");
 }
 
 /**

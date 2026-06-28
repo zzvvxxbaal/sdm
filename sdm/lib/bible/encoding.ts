@@ -12,6 +12,19 @@ export const SUPPORTED_ENCODINGS = [
 
 export type BibleEncoding = (typeof SUPPORTED_ENCODINGS)[number];
 
+function decodeBuffer(source: Uint8Array, encoding: BibleEncoding): string {
+  const buffer = Buffer.from(source);
+  if (encoding === "utf-8-bom") {
+    return buffer.toString("utf-8", 3);
+  }
+  if (encoding === "utf-8") {
+    return buffer.toString("utf-8");
+  }
+  const decoderEncoding = encoding === "cp949" ? "euc-kr" : encoding;
+  const Decoder = TextDecoder as unknown as { new (label?: string): TextDecoder };
+  return new Decoder(decoderEncoding).decode(buffer);
+}
+
 /**
  * Detects the encoding of a Bible text file by trying multiple encodings.
  * Returns the detected encoding and the decoded text.
@@ -19,7 +32,7 @@ export type BibleEncoding = (typeof SUPPORTED_ENCODINGS)[number];
  * @param buffer - Raw file buffer
  * @returns Object with encoding name and decoded text
  */
-export function detectBibleEncoding(buffer: Buffer): {
+export function detectBibleEncoding(buffer: Uint8Array): {
   encoding: BibleEncoding;
   text: string;
 } {
@@ -27,13 +40,13 @@ export function detectBibleEncoding(buffer: Buffer): {
   if (buffer.length >= 3 && buffer[0] === 0xef && buffer[1] === 0xbb && buffer[2] === 0xbf) {
     return {
       encoding: "utf-8-bom",
-      text: buffer.toString("utf-8", 3),
+      text: decodeBuffer(buffer, "utf-8-bom"),
     };
   }
 
   // Try UTF-8
   if (isValidUTF8(buffer)) {
-    const text = buffer.toString("utf-8");
+    const text = decodeBuffer(buffer, "utf-8");
     if (looksLikeKoreanBible(text)) {
       return { encoding: "utf-8", text };
     }
@@ -41,7 +54,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 
   // Try CP949 (superset of EUC-KR, most common for Korean)
   try {
-    const text = buffer.toString("cp949");
+    const text = decodeBuffer(buffer, "cp949");
     if (looksLikeKoreanBible(text)) {
       return { encoding: "cp949", text };
     }
@@ -51,7 +64,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 
   // Try EUC-KR
   try {
-    const text = buffer.toString("euc-kr");
+    const text = decodeBuffer(buffer, "euc-kr");
     if (looksLikeKoreanBible(text)) {
       return { encoding: "euc-kr", text };
     }
@@ -60,14 +73,14 @@ export function detectBibleEncoding(buffer: Buffer): {
   }
 
   // Fallback to CP949 with best effort
-  const fallbackText = buffer.toString("cp949");
+  const fallbackText = decodeBuffer(buffer, "cp949");
   return { encoding: "cp949", text: fallbackText };
 }
 
 /**
  * Validates if a buffer is valid UTF-8 without decoding.
  */
-function isValidUTF8(buffer: Buffer): boolean {
+function isValidUTF8(buffer: Uint8Array): boolean {
   try {
     const decoder = new TextDecoder("utf-8", { fatal: true });
     decoder.decode(buffer);
@@ -103,7 +116,7 @@ function looksLikeKoreanBible(text: string): boolean {
 /**
  * Converts Bible text to UTF-8 for consistent processing.
  */
-export function convertToUTF8(buffer: Buffer): string {
+export function convertToUTF8(buffer: Uint8Array): string {
   const { text } = detectBibleEncoding(buffer);
   return text;
 }

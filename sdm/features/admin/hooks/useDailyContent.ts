@@ -28,8 +28,23 @@ export function useDailyContent() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    void (async () => {
+      try {
+        const content = await getDailyContent();
+        if (!active) return;
+        setVerse(content?.todaysVerse ?? null);
+        setQt(content?.todaysQt ?? null);
+      } catch {
+        if (active) setError("오늘의 콘텐츠를 불러오지 못했습니다.");
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const saveVerse = useCallback(
     async (value: TodaysVerse) => {

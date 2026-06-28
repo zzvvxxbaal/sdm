@@ -1,102 +1,67 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { getBookById, getNextBook, getPreviousBook } from "@/models/bible_book";
+import { getChapterVerses, getResolvedReference } from "@/services/bible/bibleService";
 import type { BibleVerse } from "@/types/bible";
-import { getBookById, getNextBook, getPreviousBook, BIBLE_BOOKS } from "@/models/bible_book";
 
-interface BibleData {
-  verses: BibleVerse[];
-  stats: {
-    totalVerses: number;
-    totalBooks: number;
-    totalChapters: number;
-    oldTestamentVerses: number;
-    newTestamentVerses: number;
-  };
-}
-
-let bibleDataCache: BibleData | null = null;
-
-async function loadBibleData(): Promise<BibleData> {
-  if (bibleDataCache) return bibleDataCache;
-  const res = await fetch("/data/bible_parsed.json");
-  const data = await res.json();
-  bibleDataCache = data;
-  return data;
-}
-
-export function useBibleReader(initialBookId: string = "gen", initialChapter: number = 1) {
+export function useBibleReader(initialBookId = "gen", initialChapter = 1) {
   const [bookId, setBookId] = useState(initialBookId);
   const [chapterNumber, setChapterNumber] = useState(initialChapter);
   const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
-  const [bibleData, setBibleData] = useState<BibleData | null>(null);
 
   useEffect(() => {
-    loadBibleData().then((data) => {
-      setBibleData(data);
-      setLoading(false);
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!bibleData) return;
-    const chapterVerses = bibleData.verses.filter(
-      (v) => v.bookId === bookId && v.chapterNumber === chapterNumber
-    );
-    setVerses(chapterVerses);
-  }, [bookId, chapterNumber, bibleData]);
+    let active = true;
+    void getChapterVerses(bookId, chapterNumber)
+      .then((chapterVerses) => {
+        if (!active) return;
+        setVerses(chapterVerses);
+      })
+      .catch(() => {
+        if (!active) return;
+        setVerses([]);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [bookId, chapterNumber]);
 
   const book = useMemo(() => getBookById(bookId), [bookId]);
 
-  const goToChapter = useCallback((bid: string, ch: number) => {
-    setBookId(bid);
-    setChapterNumber(ch);
+  const goToChapter = useCallback((nextBookId: string, nextChapter: number) => {
+    setLoading(true);
+    setBookId(nextBookId);
+    setChapterNumber(nextChapter);
   }, []);
+
+  const goToReference = useCallback(async (input: string) => {
+    const resolved = await getResolvedReference(input);
+    if (!resolved) return false;
+    goToChapter(resolved.bookId, resolved.chapterNumber);
+    return true;
+  }, [goToChapter]);
 
   const goToNextChapter = useCallback(() => {
     if (!book) return;
-    if (chapterNumber < book.chapterCount) {
-      setChapterNumber((prev) => prev + 1);
-    } else {
-      const next = getNextBook(bookId);
-      if (next) {
-        setBookId(next.id);
-        setChapterNumber(1);
-      }
+    if (chapterNumber < book.chapterCount) setChapterNumber((value) => value + 1);
+    else {
+      const nextBook = getNextBook(bookId);
+      if (nextBook) goToChapter(nextBook.id, 1);
     }
-  }, [book, bookId, chapterNumber]);
+  }, [book, bookId, chapterNumber, goToChapter]);
 
   const goToPreviousChapter = useCallback(() => {
     if (!book) return;
-    if (chapterNumber > 1) {
-      setChapterNumber((prev) => prev - 1);
-    } else {
-      const prev = getPreviousBook(bookId);
-      if (prev) {
-        setBookId(prev.id);
-        setChapterNumber(prev.chapterCount);
-      }
+    if (chapterNumber > 1) setChapterNumber((value) => value - 1);
+    else {
+      const previousBook = getPreviousBook(bookId);
+      if (previousBook) goToChapter(previousBook.id, previousBook.chapterCount);
     }
-  }, [book, bookId, chapterNumber]);
+  }, [book, bookId, chapterNumber, goToChapter]);
 
-  const getChapterCount = useCallback(
-    (bid: string) => {
-      const b = BIBLE_BOOKS.find((x) => x.id === bid);
-      return b?.chapterCount ?? 0;
-    },
-    []
-  );
-
-  return {
-    bookId,
-    chapterNumber,
-    verses,
-    book,
-    loading,
-    goToChapter,
-    goToNextChapter,
-    goToPreviousChapter,
-    getChapterCount,
-  };
+  return { bookId, chapterNumber, verses, book, loading, goToChapter, goToReference, goToNextChapter, goToPreviousChapter };
 }

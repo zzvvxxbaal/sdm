@@ -26,10 +26,6 @@ import type { EventModel } from "@/models/event";
 import type { BulletinModel } from "@/models/bulletin";
 import type { PlaylistModel } from "@/models/playlist";
 
-/**
- * Generic admin list controller shared by every content entity. Each public
- * hook wires it to the matching service so callers stay tiny and consistent.
- */
 function useCrudList<TItem, TInput>(
   fetchAll: () => Promise<TItem[]>,
   create: (data: TInput, uid: string) => Promise<string>,
@@ -54,8 +50,22 @@ function useCrudList<TItem, TInput>(
   }, [fetchAll]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let active = true;
+    void (async () => {
+      try {
+        const nextItems = await fetchAll();
+        if (!active) return;
+        setItems(nextItems);
+      } catch {
+        if (active) setError("목록을 불러오지 못했습니다.");
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [fetchAll]);
 
   const save = useCallback(
     async (data: TInput, id?: string) => {

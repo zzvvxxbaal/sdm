@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useSettings } from "@/features/admin/hooks/useSettings";
 import {
@@ -17,21 +17,24 @@ const PRESETS = ["순", "셀"];
 
 export default function AdminSettingsPage() {
   const { cellLabel, isLoading, saveCellLabel } = useSettings();
-  const [singular, setSingular] = useState("");
-  const [plural, setPlural] = useState("");
+  const [draft, setDraft] = useState<{ singular: string; plural: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
-  useEffect(() => {
-    setSingular(cellLabel.singular);
-    setPlural(cellLabel.plural);
-  }, [cellLabel]);
+  const singular = draft?.singular ?? cellLabel.singular;
+  const plural = draft?.plural ?? cellLabel.plural;
+
+  const isDirty = useMemo(
+    () => singular !== cellLabel.singular || plural !== cellLabel.plural,
+    [cellLabel.plural, cellLabel.singular, plural, singular],
+  );
 
   const onSave = async () => {
     setSaving(true);
     setSaved(false);
     try {
       await saveCellLabel(singular.trim(), plural.trim());
+      setDraft(null);
       setSaved(true);
     } finally {
       setSaving(false);
@@ -56,7 +59,7 @@ export default function AdminSettingsPage() {
                 type="button"
                 size="sm"
                 variant={singular === preset ? "primary" : "secondary"}
-                onClick={() => { setSingular(preset); setPlural(`${preset}들`); }}
+                onClick={() => { setDraft({ singular: preset, plural: `${preset}들` }); }}
               >
                 {preset}
               </Button>
@@ -64,17 +67,17 @@ export default function AdminSettingsPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="단수 명칭">
-              <Input value={singular} onChange={(e) => setSingular(e.target.value)} placeholder="예: 순" />
+              <Input value={singular} onChange={(e) => setDraft({ singular: e.target.value, plural })} placeholder="예: 순" />
             </Field>
             <Field label="복수 명칭">
-              <Input value={plural} onChange={(e) => setPlural(e.target.value)} placeholder="예: 순들" />
+              <Input value={plural} onChange={(e) => setDraft({ singular, plural: e.target.value })} placeholder="예: 순들" />
             </Field>
           </div>
           <Button
             fullWidth
             onClick={onSave}
             isLoading={saving}
-            disabled={!singular.trim() || !plural.trim()}
+            disabled={!singular.trim() || !plural.trim() || !isDirty}
           >
             저장
           </Button>

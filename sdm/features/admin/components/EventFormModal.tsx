@@ -11,10 +11,8 @@ import type { EventModel } from "@/models/event";
 const CATEGORY_LABELS: Record<EventFormData["category"], string> = {
   worship: "예배",
   meeting: "모임",
-  retreat: "수련회",
-  service: "봉사",
-  social: "친교",
-  other: "기타",
+  event: "행사",
+  special_service: "특별예배",
 };
 
 interface EventFormModalProps {
@@ -33,11 +31,12 @@ export function EventFormModal({ isOpen, initial, onClose, onSave }: EventFormMo
     resolver: zodResolver(eventFormSchema),
     defaultValues: {
       title: initial?.title ?? "",
-      startDate: initial?.startDate ?? "",
-      endDate: initial?.endDate ?? "",
+      startDate: initial?.startDate ? initial.startDate.slice(0, 16) : "",
+      endDate: initial?.endDate ? initial.endDate.slice(0, 16) : "",
       location: initial?.location ?? "",
-      category: initial?.category ?? "other",
+      category: initial?.category ?? "event",
       description: initial?.description ?? "",
+      isAllDay: initial?.isAllDay ?? false,
     },
   });
 
@@ -45,11 +44,12 @@ export function EventFormModal({ isOpen, initial, onClose, onSave }: EventFormMo
     await onSave(
       {
         title: data.title,
-        startDate: data.startDate,
-        endDate: data.endDate || null,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: data.endDate ? new Date(data.endDate).toISOString() : null,
         location: data.location || null,
         category: data.category,
         description: data.description || null,
+        isAllDay: data.isAllDay,
       },
       initial?.id,
     );
@@ -63,11 +63,11 @@ export function EventFormModal({ isOpen, initial, onClose, onSave }: EventFormMo
           <Input {...register("title")} hasError={!!errors.title} placeholder="일정 제목" />
         </Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="시작일" required error={errors.startDate?.message}>
-            <Input type="date" {...register("startDate")} hasError={!!errors.startDate} />
+          <Field label="시작일시" required error={errors.startDate?.message}>
+            <Input type="datetime-local" {...register("startDate")} hasError={!!errors.startDate} />
           </Field>
-          <Field label="종료일" error={errors.endDate?.message}>
-            <Input type="date" {...register("endDate")} />
+          <Field label="종료일시" error={errors.endDate?.message}>
+            <Input type="datetime-local" {...register("endDate")} />
           </Field>
         </div>
         <Field label="분류">
@@ -85,6 +85,9 @@ export function EventFormModal({ isOpen, initial, onClose, onSave }: EventFormMo
         <Field label="설명" error={errors.description?.message}>
           <Textarea {...register("description")} rows={3} placeholder="일정 설명 (선택)" />
         </Field>
+        <label className="flex items-center gap-2 text-sm text-[#525252] dark:text-[#d4d4d8]">
+          <input type="checkbox" {...register("isAllDay")} className="h-4 w-4 rounded border-[#d4d4d8]" /> 종일 일정
+        </label>
         <div className="mt-2 flex gap-3">
           <Button type="button" variant="secondary" fullWidth onClick={onClose}>
             취소
