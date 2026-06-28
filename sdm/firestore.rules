@@ -51,7 +51,7 @@ service cloud.firestore {
       return name in [
         'users', 'teams', 'cells', 'organization_settings',
         'announcements', 'events', 'bulletins', 'playlists',
-        'daily_content', 'audit_logs', 'qt_entries'
+        'daily_content', 'audit_logs', 'qt_entries', 'prayer_requests'
       ];
     }
 
@@ -178,6 +178,34 @@ service cloud.firestore {
         || isAdminPlus();
       allow delete: if isOwner(resource.data.userId)
         || isAdminPlus();
+    }
+
+    // ---------- Prayer requests (community prayer board) ----------
+    // All approved members can read prayer requests.
+    // All approved members can create their own prayer requests.
+    // Leaders can mark prayers as answered.
+    // Admins can delete prayers.
+    match /prayer_requests/{prayerId} {
+      allow get, list: if isApprovedActive();
+      allow create: if isApprovedActive()
+        && request.resource.data.createdBy == request.auth.uid;
+      allow update: if isOwner(resource.data.createdBy)
+        || (isLeaderPlus() && onlyAnsweredStatusChange())
+        || isAdminPlus();
+      allow delete: if isAdminPlus();
+    }
+
+    // Helper function to check if only answered status can be changed (for leaders marking prayers)
+    function onlyAnsweredStatusChange() {
+      let before = resource.data;
+      let after = request.resource.data;
+      return after.title == before.title
+        && after.content == before.content
+        && after.category == before.category
+        && after.isAnonymous == before.isAnonymous
+        && after.prayerCount == before.prayerCount
+        && after.isActive == before.isActive
+        && after.createdBy == before.createdBy;
     }
 
     // ---------- Default: approved members read; leaders write ----------
