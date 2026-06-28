@@ -38,7 +38,11 @@ useEffect(() => {
   fetchRole();
 }, []);
 
-if (role && role !== "admin") {
+if (role === null) {
+  return <div>Loading...</div>;
+}
+
+if (role !== "admin") {
   return <div>Access Denied</div>;
 }
 
