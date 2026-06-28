@@ -12,7 +12,7 @@ import {
 
 import { getAuth } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/firebase/config";
 import { useEffect, useState } from "react";
 
 import { useAdminStats } from "@/features/admin/hooks/useAdminStats";
