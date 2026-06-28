@@ -62,6 +62,7 @@ export function useQT(): UseQTResult {
   }, [user?.uid, today]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
     void fetchEntries();
   }, [fetchEntries]);
 

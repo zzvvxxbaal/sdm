@@ -6,7 +6,6 @@ import { SectionCard } from "./SectionCard";
 import { SectionError } from "./SectionError";
 import { EmptyState } from "@/components/ui";
 import { useQT } from "@/hooks/useQT";
-import type { QTEntry } from "@/types/qt";
 
 export function TodaysUserQtCard() {
   const { todayQT, loading, error } = useQT();
