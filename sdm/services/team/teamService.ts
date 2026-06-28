@@ -10,7 +10,6 @@ import {
   where,
   orderBy,
   serverTimestamp,
-  type Timestamp,
 } from "firebase/firestore";
 
 import { db } from "@/firebase/config";

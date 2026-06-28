@@ -18,6 +18,7 @@ export function BulletinViewerModal({ bulletin, onClose }: BulletinViewerModalPr
       <div className="max-h-[80vh] overflow-auto rounded-2xl bg-[#0f172a] p-2">
         {bulletin.fileURL ? (
           isImage ? (
+            // eslint-disable-next-line @next/next/no-img-element
             <img src={bulletin.fileURL} alt={bulletin.title} className="mx-auto h-auto max-w-full rounded-xl" />
           ) : (
             <iframe title={bulletin.title} src={bulletin.fileURL} className="h-[70vh] w-full rounded-xl bg-white" />
