@@ -6,6 +6,7 @@ import { useActivityStreak } from "@/features/home/hooks/useActivityStreak";
 import {
   TodaysVerseCard,
   TodaysQtCard,
+  TodaysUserQtCard,
   QuickActions,
   AnnouncementsPreview,
   WeeklyScheduleCard,
@@ -47,6 +48,7 @@ export default function MainPage() {
               qt={home.dailyContent?.todaysQt ?? null}
               error={home.errors.daily}
             />
+            <TodaysUserQtCard />
             <QuickActions />
             <AnnouncementsPreview
               announcements={home.announcements}

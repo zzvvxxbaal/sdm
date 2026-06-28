@@ -2,6 +2,7 @@ export { SectionCard } from "./SectionCard";
 export { SectionError } from "./SectionError";
 export { TodaysVerseCard } from "./TodaysVerseCard";
 export { TodaysQtCard } from "./TodaysQtCard";
+export { TodaysUserQtCard } from "./TodaysUserQtCard";
 export { AnnouncementsPreview } from "./AnnouncementsPreview";
 export { WeeklyScheduleCard } from "./WeeklyScheduleCard";
 export { BulletinPreviewCard } from "./BulletinPreviewCard";
