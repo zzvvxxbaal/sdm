@@ -15,6 +15,7 @@ import {
   MyChurchInfoCard,
   ActivitySummaryCard,
   HomeSkeleton,
+  RecentPrayersCard,
 } from "@/features/home/components";
 
 export default function MainPage() {
@@ -49,6 +50,7 @@ export default function MainPage() {
               error={home.errors.daily}
             />
             <TodaysUserQtCard />
+            <RecentPrayersCard />
             <QuickActions />
             <AnnouncementsPreview
               announcements={home.announcements}
