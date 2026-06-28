@@ -41,7 +41,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 
   // Try CP949 (superset of EUC-KR, most common for Korean)
   try {
-    const text = buffer.toString("cp949");
+    const text = buffer.toString("cp949" as BufferEncoding);
     if (looksLikeKoreanBible(text)) {
       return { encoding: "cp949", text };
     }
@@ -51,7 +51,7 @@ export function detectBibleEncoding(buffer: Buffer): {
 
   // Try EUC-KR
   try {
-    const text = buffer.toString("euc-kr");
+    const text = buffer.toString("euc-kr" as BufferEncoding);
     if (looksLikeKoreanBible(text)) {
       return { encoding: "euc-kr", text };
     }
@@ -60,7 +60,7 @@ export function detectBibleEncoding(buffer: Buffer): {
   }
 
   // Fallback to CP949 with best effort
-  const fallbackText = buffer.toString("cp949");
+  const fallbackText = buffer.toString("cp949" as BufferEncoding);
   return { encoding: "cp949", text: fallbackText };
 }
 
