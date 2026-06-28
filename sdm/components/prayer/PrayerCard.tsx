@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { PrayerRequestModel } from "@/models/prayer_request";
 import { useRole } from "@/hooks/useRole";
+import { isLeader, isAdmin } from "@/types/role";
 
 interface PrayerCardProps {
   prayer: PrayerRequestModel & { id: string };
@@ -16,15 +17,6 @@ interface PrayerCardProps {
   isLoading?: boolean;
   isSupported?: boolean;
 }
-
-const CATEGORY_LABELS: Record<string, string> = {
-  personal: "개인적인 기도",
-  family: "가정을 위한 기도",
-  church: "교회를 위한 기도",
-  mission: "선교를 위한 기도",
-  healing: "치유를 위한 기도",
-  other: "기타",
-};
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; label: string }> = {
   personal: { bg: "bg-blue-50", text: "text-blue-700", label: "개인" },
@@ -44,14 +36,14 @@ export function PrayerCard({
   isLoading = false,
   isSupported = false,
 }: PrayerCardProps) {
-  const { isLeader, isAdmin } = useRole();
+  const { role } = useRole();
 
-  const createdAtTime =
-    prayer.createdAt && typeof prayer.createdAt === "object" && "toDate" in prayer.createdAt
-      ? (prayer.createdAt as any).toDate()
-      : prayer.createdAt instanceof Date
-        ? prayer.createdAt
-        : new Date();
+  const canMarkAnswered = role ? isLeader(role) || isAdmin(role) : false;
+  const canDelete = role ? isAdmin(role) : false;
+
+  const createdAtTime = (prayer.createdAt as any)?.toDate
+    ? (prayer.createdAt as any).toDate()
+    : new Date();
 
   const timeAgo = formatDistanceToNow(createdAtTime, {
     locale: ko,
@@ -59,9 +51,6 @@ export function PrayerCard({
   });
 
   const categoryColor = CATEGORY_COLORS[prayer.category] || CATEGORY_COLORS.other;
-
-  const canMarkAnswered = isLeader || isAdmin;
-  const canDelete = isAdmin;
 
   return (
     <div
