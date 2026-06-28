@@ -41,8 +41,8 @@ export function PrayerCard({
   const canMarkAnswered = role ? isLeader(role) || isAdmin(role) : false;
   const canDelete = role ? isAdmin(role) : false;
 
-  const createdAtTime = (prayer.createdAt as any)?.toDate
-    ? (prayer.createdAt as any).toDate()
+  const createdAtTime = prayer.createdAt && typeof prayer.createdAt === "object" && "toDate" in (prayer.createdAt as Record<string, unknown>)
+    ? ((prayer.createdAt as Record<string, unknown>).toDate as () => Date)()
     : new Date();
 
   const timeAgo = formatDistanceToNow(createdAtTime, {

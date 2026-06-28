@@ -8,6 +8,7 @@ import { SectionError } from "./SectionError";
 import { usePrayers } from "@/hooks/usePrayers";
 import { PrayerEditor } from "@/components/prayer/PrayerEditor";
 import { cn } from "@/lib/utils";
+import type { PrayerRequestModel } from "@/models/prayer_request";
 
 export function RecentPrayersCard() {
   const { prayers, loading, error, createPrayer, incrementPrayerCount } = usePrayers();
@@ -18,7 +19,7 @@ export function RecentPrayersCard() {
     .filter((p) => !p.isAnswered)
     .slice(0, 3);
 
-  const handleCreatePrayer = async (data: any) => {
+  const handleCreatePrayer = async (data: Omit<PrayerRequestModel, "id" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy">) => {
     setIsSubmitting(true);
     try {
       await createPrayer(data);

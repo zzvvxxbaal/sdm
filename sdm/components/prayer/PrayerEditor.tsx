@@ -107,7 +107,7 @@ export function PrayerEditor({ onSubmit, isLoading = false }: PrayerEditorProps)
         <label className="text-xs font-semibold text-[#737373] mb-1.5 block">카테고리</label>
         <select
           value={category}
-          onChange={(e) => setCategory(e.target.value as any)}
+          onChange={(e) => setCategory(e.target.value as "personal" | "family" | "church" | "mission" | "healing" | "other")}
           disabled={isSubmitting || isLoading}
           className={cn(
             "w-full rounded-xl border border-[#e5e5e5] bg-white px-4 py-3 text-sm",

@@ -165,7 +165,8 @@ export async function incrementPrayerCount(prayerId: string): Promise<void> {
   const docRef = doc(db, COLLECTIONS.PRAYER_REQUESTS, prayerId);
   const snap = await getDoc(docRef);
   if (snap.exists()) {
-    const currentCount = (snap.data() as any).prayerCount ?? 0;
+    const data = snap.data() as PrayerRequestModel;
+    const currentCount = data.prayerCount ?? 0;
     await updateDoc(docRef, {
       prayerCount: currentCount + 1,
       updatedAt: serverTimestamp(),

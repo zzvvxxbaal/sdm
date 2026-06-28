@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import { usePrayers } from "@/hooks/usePrayers";
 import { PrayerList, PrayerEditor } from "@/components/prayer";
 import { cn } from "@/lib/utils";
+import type { PrayerRequestModel } from "@/models/prayer_request";
 
 export default function PrayersPage() {
   const {
@@ -22,7 +23,7 @@ export default function PrayersPage() {
   const [showAnswered, setShowAnswered] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreatePrayer = async (data: any) => {
+  const handleCreatePrayer = async (data: Omit<PrayerRequestModel, "id" | "createdAt" | "updatedAt" | "createdBy" | "updatedBy">) => {
     setIsSubmitting(true);
     try {
       await createPrayer(data);
