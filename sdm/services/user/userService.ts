@@ -192,3 +192,21 @@ export async function updateLastLogin(uid: string): Promise<void> {
     // Non-critical: a missing profile (first social login) is handled elsewhere.
   });
 }
+
+/**
+ * Updates the role of a user. Only admins should call this function.
+ */
+export async function updateUserRole(
+  uid: string,
+  role: UserRole
+): Promise<void> {
+  await updateDoc(userWriteDoc(uid), { role, updatedAt: nowIso() });
+}
+
+/**
+ * Gets the current role of a user. Returns "user" if not found.
+ */
+export async function getCurrentUserRole(uid: string): Promise<UserRole> {
+  const profile = await getProfile(uid);
+  return profile?.role ?? UserRole.USER;
+}

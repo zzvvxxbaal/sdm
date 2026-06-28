@@ -11,4 +11,7 @@ export {
   rejectMember,
   setActiveState,
   updateLastLogin,
+  updateUserRole,
+  getCurrentUserRole,
 } from "./userService";
+
