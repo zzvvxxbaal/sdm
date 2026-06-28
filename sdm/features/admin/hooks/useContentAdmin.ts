@@ -54,8 +54,23 @@ function useCrudList<TItem, TInput>(
   }, [fetchAll]);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await fetchAll();
+        if (isMounted) setItems(data);
+      } catch {
+        if (isMounted) setError("목록을 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [fetchAll]);
 
   const save = useCallback(
     async (data: TInput, id?: string) => {

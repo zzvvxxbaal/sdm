@@ -36,8 +36,23 @@ export function useSettings() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const settings = await getOrganizationSettings();
+        if (isMounted && settings) setCellLabel(settings.cellLabel);
+      } catch {
+        if (isMounted) setError("설정을 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const saveCellLabel = useCallback(
     async (singular: string, plural: string) => {

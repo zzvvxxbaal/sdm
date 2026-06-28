@@ -8,6 +8,7 @@ import {
   Settings,
   ClipboardList,
   Boxes,
+  BarChart3,
 } from "lucide-react";
 
 import { useAdminStats } from "@/features/admin/hooks/useAdminStats";
@@ -30,6 +31,18 @@ export default function AdminDashboardPage() {
       </div>
 
       <div className="space-y-2.5">
+        <AdminNavCard
+          href="/admin/analytics"
+          icon={BarChart3}
+          title="분석 대시보드"
+          description="사용자 · QT · 기도 · 공지 통계"
+        />
+        <AdminNavCard
+          href="/admin/users"
+          icon={Users2}
+          title="사용자 분석"
+          description="사용자 목록 · 역할 · 가입일"
+        />
         <AdminNavCard
           href="/admin/members"
           icon={Users2}

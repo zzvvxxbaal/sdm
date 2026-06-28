@@ -55,8 +55,33 @@ export function useMemberAdmin() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [memberList, teamList, cellList] = await Promise.all([
+          listAllMembers(),
+          getAllTeams(),
+          getAllCells(),
+        ]);
+        if (isMounted) {
+          setMembers(memberList);
+          setTeams(teamList.map((t) => ({ id: t.id, name: t.name })));
+          setCells(
+            cellList.map((c) => ({ id: c.id, name: c.name, teamId: c.teamId }))
+          );
+        }
+      } catch {
+        if (isMounted) setError("회원 목록을 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const byStatus = useMemo(
     () => ({

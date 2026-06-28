@@ -1,5 +1,5 @@
 import { BIBLE_BOOKS, getBookByFileAbbreviation } from "@/models/bible_book";
-import { detectBibleEncoding, convertToUTF8 } from "./encoding";
+import { convertToUTF8 } from "./encoding";
 import type { BibleVerse, BibleBook, BibleReference } from "@/types/bible";
 
 export interface ParsedBibleChapter {
@@ -47,8 +47,6 @@ export function parseBibleText(rawText: string): ParsedBibleFile {
 
   const lines = rawText.split("\n").filter((line) => line.trim().length > 0);
 
-  let currentBookId: string | null = null;
-  let currentChapterNumber: number = 1;
   const seenChapters = new Set<string>();
 
   for (const line of lines) {
@@ -66,8 +64,6 @@ export function parseBibleText(rawText: string): ParsedBibleFile {
 
       const book = getBookByFileAbbreviation(bookAbbreviation);
       if (book) {
-        currentBookId = book.id;
-        currentChapterNumber = chapterNumber;
         booksParsed.add(book.name);
 
         // Clean chapter titles: "<천지 창조>" → remove angle brackets
@@ -206,7 +202,7 @@ export function parseBibleReference(input: string): BibleReference | null {
 
   match = normalized.match(crossChapterPattern);
   if (match) {
-    const [, bookName, startChapter, startVerse, endChapter, endVerse] = match;
+    const [, bookName, startChapter, startVerse, , endVerse] = match;
     const book = findBookByName(bookName);
     if (!book) return null;
     return {

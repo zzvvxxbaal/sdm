@@ -10,7 +10,7 @@ import {
   limit,
 } from "firebase/firestore";
 import type { BibleVerse, BibleReference } from "@/types/bible";
-import { getBookById, getBookByFileAbbreviation } from "@/models/bible_book";
+import { getBookByFileAbbreviation } from "@/models/bible_book";
 
 const BIBLE_VERSES_COLLECTION = "bible_verses";
 
@@ -163,7 +163,7 @@ export function parseReference(input: string): BibleReference | null {
 
   match = trimmed.match(crossChapterPattern);
   if (match) {
-    const [, bookName, startChapter, startVerse, endChapter, endVerse] = match;
+    const [, bookName, startChapter, startVerse, , endVerse] = match;
     const book = getBookByFileAbbreviation(bookName);
     if (!book) return null;
     return {

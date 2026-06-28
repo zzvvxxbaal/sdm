@@ -28,7 +28,6 @@ async function loadBibleData(): Promise<BibleData> {
 export function useBibleReader(initialBookId: string = "gen", initialChapter: number = 1) {
   const [bookId, setBookId] = useState(initialBookId);
   const [chapterNumber, setChapterNumber] = useState(initialChapter);
-  const [verses, setVerses] = useState<BibleVerse[]>([]);
   const [loading, setLoading] = useState(true);
   const [bibleData, setBibleData] = useState<BibleData | null>(null);
 
@@ -39,12 +38,11 @@ export function useBibleReader(initialBookId: string = "gen", initialChapter: nu
     });
   }, []);
 
-  useEffect(() => {
-    if (!bibleData) return;
-    const chapterVerses = bibleData.verses.filter(
+  const verses = useMemo(() => {
+    if (!bibleData) return [];
+    return bibleData.verses.filter(
       (v) => v.bookId === bookId && v.chapterNumber === chapterNumber
     );
-    setVerses(chapterVerses);
   }, [bookId, chapterNumber, bibleData]);
 
   const book = useMemo(() => getBookById(bookId), [bookId]);

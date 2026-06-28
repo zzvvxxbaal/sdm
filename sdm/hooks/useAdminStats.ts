@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { adminStatsService } from "../services/adminStatsService";
+import { adminStatsService } from "../services/adminStatsServices";
 
 export function useAdminStats() {
   const [loading, setLoading] = useState(true);

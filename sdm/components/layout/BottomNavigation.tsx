@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import {
   BookOpen,
-  Search,
   PenLine,
   User,
   Settings,
@@ -33,7 +32,8 @@ export function BottomNavigation() {
       className={cn(
         "fixed bottom-0 left-0 right-0 z-50 h-16",
         "border-t border-[#e5e5e5] bg-white/90 backdrop-blur-md",
-        "dark:border-[#2c2c2e] dark:bg-[#0a0a0a]/90"
+        "dark:border-[#2c2c2e] dark:bg-[#0a0a0a]/90",
+        "[padding-bottom:max(1rem,env(safe-area-inset-bottom))]"
       )}
     >
       <div className="mx-auto flex h-full max-w-lg items-center justify-around px-2">

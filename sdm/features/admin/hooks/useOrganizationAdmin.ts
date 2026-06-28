@@ -43,8 +43,31 @@ export function useOrganizationAdmin() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [teamList, cellList, members] = await Promise.all([
+          getAllTeams(),
+          getAllCells(),
+          listAllMembers(),
+        ]);
+        if (isMounted) {
+          setTeams(teamList);
+          setCells(cellList);
+          setLeaders(members.map((m) => ({ id: m.uid, name: m.displayName ?? "이름없음" })));
+        }
+      } catch {
+        if (isMounted) setError("조직 정보를 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const nameOf = useCallback(
     (id: string) => leaders.find((l) => l.id === id)?.name ?? null,

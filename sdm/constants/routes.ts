@@ -15,6 +15,7 @@ export const ROUTES = {
   MEMBER: "/members",
   MEMBER_DETAIL: (id: string) => `/members/${id}`,
 
+  PRAYERS: "/prayers",
   PRAYER: "/prayer",
   PRAYER_DETAIL: (id: string) => `/prayer/${id}`,
   PRAYER_WRITE: "/prayer/write",

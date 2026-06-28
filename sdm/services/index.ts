@@ -5,3 +5,4 @@ export * from "./user";
 export * from "./content";
 export * from "./daily";
 export * from "./stats";
+export * from "./prayer/prayerService";

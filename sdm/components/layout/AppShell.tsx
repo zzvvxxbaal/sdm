@@ -18,7 +18,7 @@ export function AppShell({ children, showHeader = true, showNav = true }: AppShe
         className={cn(
           "mx-auto max-w-lg",
           showHeader && "pt-14",
-          showNav && "pb-16"
+          showNav && "pb-[calc(4rem+max(1rem,env(safe-area-inset-bottom)))]"
         )}
       >
         {children}

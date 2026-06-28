@@ -6,7 +6,9 @@ import { useActivityStreak } from "@/features/home/hooks/useActivityStreak";
 import {
   TodaysVerseCard,
   TodaysQtCard,
+  TodaysUserQtCard,
   QuickActions,
+  AdminShortcutCard,
   AnnouncementsPreview,
   WeeklyScheduleCard,
   BulletinPreviewCard,
@@ -14,6 +16,7 @@ import {
   MyChurchInfoCard,
   ActivitySummaryCard,
   HomeSkeleton,
+  RecentPrayersCard,
 } from "@/features/home/components";
 
 export default function MainPage() {
@@ -47,7 +50,10 @@ export default function MainPage() {
               qt={home.dailyContent?.todaysQt ?? null}
               error={home.errors.daily}
             />
+            <TodaysUserQtCard />
+            <RecentPrayersCard />
             <QuickActions />
+            <AdminShortcutCard />
             <AnnouncementsPreview
               announcements={home.announcements}
               error={home.errors.announcements}

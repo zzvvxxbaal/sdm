@@ -26,7 +26,7 @@ export default function AdminDashboard() {
           {Object.entries(stats.teamStats).map(([team, count]) => (
             <div key={team} className="flex justify-between border p-2 rounded">
               <span>{team}</span>
-              <span>{count}명</span>
+              <span>{(count as number)}명</span>
             </div>
           ))}
         </div>
@@ -39,7 +39,7 @@ export default function AdminDashboard() {
           {Object.entries(stats.cellStats).map(([cell, count]) => (
             <div key={cell} className="flex justify-between border p-2 rounded">
               <span>{cell}</span>
-              <span>{count}명</span>
+              <span>{(count as number)}명</span>
             </div>
           ))}
         </div>
