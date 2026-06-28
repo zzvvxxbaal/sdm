@@ -90,11 +90,6 @@ export function useHomeData(
 
     let active = true;
 
-    setData((current) => ({
-      ...current,
-      loading: true,
-    }));
-
     void (async () => {
       const [daily, announcements, events, prayers] =
         await Promise.allSettled([
