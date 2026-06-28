@@ -24,14 +24,10 @@ export function useRole(): UseRoleResult {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // If no user, return early and let initial state handle it
     if (!user?.uid) {
-      setRole(null);
-      setIsLoading(false);
       return;
     }
-
-    setIsLoading(true);
-    setError(null);
 
     // Subscribe to user document for real-time role updates
     const userDocRef = doc(db, COLLECTIONS.USERS, user.uid);
