@@ -42,7 +42,7 @@ if (role === null) {
   return <div>Loading...</div>;
 }
 
-if (role !== "admin") {
+if (role !== "admin" && role !== "super_admin") {
   return <div>Access Denied</div>;
 }
 
