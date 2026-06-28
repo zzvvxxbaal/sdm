@@ -5,58 +5,47 @@ import { useEffect, useState } from "react";
 import {
   getAllAnnouncements,
   getAllEvents,
-  getAllBulletins,
-  getAllPlaylists,
 } from "@/services/content";
 import { getDailyContent } from "@/services/daily";
-import { toDateSafe } from "../lib/home-format";
+import { getVisiblePrayerRequests } from "@/services/prayer";
+import { isSameDay, toDateSafe } from "@/lib/date";
 import type { AnnouncementModel } from "@/models/announcement";
 import type { EventModel } from "@/models/event";
-import type { BulletinModel } from "@/models/bulletin";
-import type { PlaylistModel } from "@/models/playlist";
 import type { DailyContentModel } from "@/models/daily_content";
+import type { PrayerRequestModel } from "@/models/prayer_request";
+import type { PrayerViewerContext } from "@/types/prayer";
 
-const ANNOUNCEMENT_PREVIEW_COUNT = 5;
+const ANNOUNCEMENT_PREVIEW_COUNT = 3;
+const PRAYER_PREVIEW_COUNT = 3;
+const TODAY_EVENT_PREVIEW_COUNT = 3;
 
 export interface HomeErrors {
   daily: boolean;
   announcements: boolean;
   events: boolean;
-  bulletin: boolean;
-  playlists: boolean;
+  prayers: boolean;
 }
 
 export interface HomeData {
   loading: boolean;
   dailyContent: DailyContentModel | null;
   announcements: AnnouncementModel[];
-  weeklyEvents: EventModel[];
-  latestBulletin: BulletinModel | null;
-  playlists: PlaylistModel[];
+  todaysEvents: EventModel[];
+  prayerRequests: PrayerRequestModel[];
   errors: HomeErrors;
 }
 
-function getWeekRange(now: Date): { start: number; end: number } {
-  const day = now.getDay();
-  const diffToMonday = (day + 6) % 7;
-  const start = new Date(now);
-  start.setHours(0, 0, 0, 0);
-  start.setDate(now.getDate() - diffToMonday);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 7);
-  return { start: start.getTime(), end: end.getTime() };
-}
-
-function filterWeeklyEvents(events: EventModel[]): EventModel[] {
-  const { start, end } = getWeekRange(new Date());
+function filterTodaysEvents(events: EventModel[]): EventModel[] {
+  const today = new Date();
   return events
     .filter((event) => {
-      const t = new Date(event.startDate).getTime();
-      return !Number.isNaN(t) && t >= start && t < end;
+      const date = toDateSafe(event.startDate);
+      return date !== null && isSameDay(date, today);
     })
     .sort(
       (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-    );
+    )
+    .slice(0, TODAY_EVENT_PREVIEW_COUNT);
 }
 
 function sortAnnouncements(items: AnnouncementModel[]): AnnouncementModel[] {
@@ -78,55 +67,61 @@ const NO_ERRORS: HomeErrors = {
   daily: false,
   announcements: false,
   events: false,
-  bulletin: false,
-  playlists: false,
+  prayers: false,
 };
 
 const INITIAL: HomeData = {
   loading: true,
   dailyContent: null,
   announcements: [],
-  weeklyEvents: [],
-  latestBulletin: null,
-  playlists: [],
+  todaysEvents: [],
+  prayerRequests: [],
   errors: NO_ERRORS,
 };
 
-export function useHomeData(): HomeData {
+export function useHomeData(
+  viewer: PrayerViewerContext | null,
+  authLoading: boolean,
+): HomeData {
   const [data, setData] = useState<HomeData>(INITIAL);
 
   useEffect(() => {
+    if (authLoading) return;
+
     let active = true;
+
+    setData((current) => ({
+      ...current,
+      loading: true,
+    }));
+
     void (async () => {
-      const [daily, announcements, events, bulletins, playlists] =
+      const [daily, announcements, events, prayers] =
         await Promise.allSettled([
           getDailyContent(),
           getAllAnnouncements(),
           getAllEvents(),
-          getAllBulletins(),
-          getAllPlaylists(),
+          viewer ? getVisiblePrayerRequests(viewer) : Promise.resolve([]),
         ]);
       if (!active) return;
       setData({
         loading: false,
         dailyContent: valueOr(daily, null),
         announcements: sortAnnouncements(valueOr(announcements, [])),
-        weeklyEvents: filterWeeklyEvents(valueOr(events, [])),
-        latestBulletin: valueOr(bulletins, [])[0] ?? null,
-        playlists: valueOr(playlists, []),
+        todaysEvents: filterTodaysEvents(valueOr(events, [])),
+        prayerRequests: valueOr(prayers, []).slice(0, PRAYER_PREVIEW_COUNT),
         errors: {
           daily: daily.status === "rejected",
           announcements: announcements.status === "rejected",
           events: events.status === "rejected",
-          bulletin: bulletins.status === "rejected",
-          playlists: playlists.status === "rejected",
+          prayers: prayers.status === "rejected",
         },
       });
     })();
     return () => {
       active = false;
     };
-  }, []);
+  }, [authLoading, viewer]);
 
   return data;
 }
