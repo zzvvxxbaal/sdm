@@ -28,8 +28,26 @@ export function useDailyContent() {
   }, []);
 
   useEffect(() => {
-    void load();
-  }, [load]);
+    let isMounted = true;
+    void (async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const content = await getDailyContent();
+        if (isMounted) {
+          setVerse(content?.todaysVerse ?? null);
+          setQt(content?.todaysQt ?? null);
+        }
+      } catch {
+        if (isMounted) setError("오늘의 콘텐츠를 불러오지 못했습니다.");
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const saveVerse = useCallback(
     async (value: TodaysVerse) => {

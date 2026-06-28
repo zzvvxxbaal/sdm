@@ -46,18 +46,16 @@ export function useActivityStreak(userId: string | undefined): {
   streak: number;
   loading: boolean;
 } {
-  const [streak, setStreak] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [computedStreak, setComputedStreak] = useState(0);
+  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     if (!userId) {
-      setStreak(0);
-      setLoading(false);
       return;
     }
     let active = true;
     void (async () => {
-      setLoading(true);
+      if (active) setIsFetching(true);
       try {
         const entries = await getUserQTEntriesWithLimit(userId, {
           limit: LOOKBACK_LIMIT,
@@ -65,17 +63,20 @@ export function useActivityStreak(userId: string | undefined): {
         const keys = entries
           .map(entryKey)
           .filter((key): key is string => key !== null);
-        if (active) setStreak(computeStreak(keys, new Date()));
+        if (active) setComputedStreak(computeStreak(keys, new Date()));
       } catch {
-        if (active) setStreak(0);
+        if (active) setComputedStreak(0);
       } finally {
-        if (active) setLoading(false);
+        if (active) setIsFetching(false);
       }
     })();
     return () => {
       active = false;
     };
   }, [userId]);
+
+  const streak = userId ? computedStreak : 0;
+  const loading = userId ? isFetching : false;
 
   return { streak, loading };
 }
